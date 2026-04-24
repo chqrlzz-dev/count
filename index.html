@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PrintBill — Printing Shop Invoice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inconsolata:wght@400;500;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ─── App Shell ─── -->
+<div class="app-shell">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">PrintBill</div>
+        <div class="brand-sub">Printing Shop Invoice</div>
+      </div>
+    </div>
+
+    <div class="header-status" role="status" aria-live="polite" id="status-pill">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">Ready</span>
+    </div>
+
+    <div class="header-actions">
+      <!-- Recent -->
+      <div class="relative">
+        <button class="icon-btn" id="btn-recent" aria-label="Recent invoices" title="Recent invoices">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </button>
+        <div class="dropdown-menu" id="recent-dropdown">
+          <div class="dropdown-header">Recent Invoices</div>
+          <div id="recent-list"></div>
+          <div class="dropdown-footer">
+            <button class="danger-btn" style="width:100%;justify-content:center" id="btn-clear-recent">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+              Clear history
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <button class="icon-btn" id="btn-settings" aria-label="Settings" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+
+      <!-- Theme -->
+      <button class="icon-btn" id="btn-theme" aria-label="Toggle theme" title="Toggle theme">
+        <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main-content">
+
+    <!-- Left Panel -->
+    <div class="left-panel">
+
+      <!-- Section 01: Remarks & Place Order -->
+      <section class="section-card" id="step-export">
+        <div class="section-header">
+          <span class="section-num">01</span>
+          <span class="section-title">Remarks &amp; Place Order</span>
+        </div>
+        <div class="section-body">
+          <div class="field-row">
+            <label class="field-label" for="remarks">Remarks / Special Instructions</label>
+            <textarea id="remarks" class="remarks-input" rows="3" placeholder="e.g. Rush order, Spiral binding, Colored cover, etc." aria-label="Special remarks or instructions"></textarea>
+          </div>
+
+          <!-- PRIMARY CTA: Place Order -->
+          <button class="btn-primary" id="btn-place-order">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Place Order
+          </button>
+
+          <div class="export-actions">
+            <button class="btn-ghost" id="btn-copy-image" title="Copy invoice as image (Ctrl+Shift+C)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy as Image
+            </button>
+            <button class="btn-ghost" id="btn-print" aria-label="Print invoice">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Print
+            </button>
+            <button class="btn-ghost" id="btn-save-png" aria-label="Save as PNG file">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Save PNG
+            </button>
+            <button class="btn-ghost" id="btn-new-invoice" aria-label="Start new invoice">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              New Invoice
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 02: Upload -->
+      <section class="section-card" id="step-upload">
+        <div class="section-header">
+          <span class="section-num">02</span>
+          <span class="section-title">Upload Files</span>
+        </div>
+        <div class="section-body">
+          <!-- Drop zone (full) -->
+          <div class="drop-zone" id="drop-zone" tabindex="0" role="button" aria-label="Upload files. Click or drag PDF or DOCX files here.">
+            <div class="drop-zone-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div class="drop-zone-title">Drop PDF or DOCX files here</div>
+            <div class="drop-zone-sub">Pages counted automatically · Set copies per document</div>
+          </div>
+
+          <!-- Compact add more (hidden until first file) -->
+          <div class="drop-zone-compact" id="drop-zone-compact" style="display:none" tabindex="0" role="button" aria-label="Add more files">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add more files
+          </div>
+
+          <!-- Hidden file input -->
+          <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc" style="display:none" aria-label="Choose files" />
+
+          <!-- File Table -->
+          <div id="file-table-container" style="display:none">
+            <div class="file-table-wrap">
+              <table class="file-table" aria-label="Uploaded files">
+                <thead>
+                  <tr>
+                    <th style="width:32px">#</th>
+                    <th>File Name</th>
+                    <th style="width:90px">Paper</th>
+                    <th style="width:90px">Color</th>
+                    <th style="width:72px">Pages</th>
+                    <th style="width:72px">Copies</th>
+                    <th style="width:80px">Total</th>
+                    <th style="width:36px"></th>
+                  </tr>
+                </thead>
+                <tbody id="file-table-body"></tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3" style="font-size:11px;color:var(--text-2)">
+                      Total Printed Pages: <span id="tfoot-total-pages" style="font-family:var(--font-mono);color:var(--text-1);font-weight:600">0</span>
+                    </td>
+                    <td colspan="4" style="text-align:right">
+                      Subtotal: <span id="tfoot-subtotal" style="font-family:var(--font-mono);font-weight:700">₱0.00</span>
+                    </td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div class="table-actions">
+              <button class="btn-secondary" id="btn-add-item" aria-label="Add manual line item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Item
+              </button>
+              <button class="btn-secondary" id="btn-reset-copies" aria-label="Reset all copies to 1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
+                Reset Copies
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 03: Pricing Configuration (centralized 2×3 matrix) -->
+      <section class="section-card" id="step-pricing">
+        <div class="section-header">
+          <span class="section-num">03</span>
+          <span class="section-title">Pricing Configuration</span>
+        </div>
+        <div class="section-body">
+
+          <!-- Centralized 2×3 Pricing Grid -->
+          <div style="margin-bottom:16px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-2);margin-bottom:12px">Price per Page (₱) by Paper Size &amp; Color Mode</div>
+            <table class="pricing-matrix" id="pricing-matrix-table" aria-label="Pricing matrix">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Long (Folio)</th>
+                  <th>Short (Letter)</th>
+                  <th>A4</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th class="mode-label">B&amp;W</th>
+                  <td><input type="number" class="matrix-input" id="price-bw-long"  value="5.00" min="0" step="0.50" data-mode="bw"    data-size="long"  aria-label="B&W Long price" /></td>
+                  <td><input type="number" class="matrix-input" id="price-bw-short" value="3.00" min="0" step="0.50" data-mode="bw"    data-size="short" aria-label="B&W Short price" /></td>
+                  <td><input type="number" class="matrix-input" id="price-bw-a4"    value="3.00" min="0" step="0.50" data-mode="bw"    data-size="a4"    aria-label="B&W A4 price" /></td>
+                </tr>
+                <tr>
+                  <th class="mode-label color-mode">Color</th>
+                  <td><input type="number" class="matrix-input" id="price-color-long"  value="15.00" min="0" step="0.50" data-mode="color" data-size="long"  aria-label="Color Long price" /></td>
+                  <td><input type="number" class="matrix-input" id="price-color-short" value="10.00" min="0" step="0.50" data-mode="color" data-size="short" aria-label="Color Short price" /></td>
+                  <td><input type="number" class="matrix-input" id="price-color-a4"    value="10.00" min="0" step="0.50" data-mode="color" data-size="a4"    aria-label="Color A4 price" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pricing-grid">
+            <!-- Tax / Toggles -->
+            <div class="pricing-card">
+              <div class="pricing-card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Tax &amp; Rounding
+              </div>
+
+              <div class="field-row">
+                <label class="field-label" for="default-copies">Default copies per file</label>
+                <input type="number" id="default-copies" class="field-input" value="1" min="1" step="1" aria-label="Default number of copies" />
+              </div>
+
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Tax / VAT</div>
+                  <div class="toggle-sub" id="tax-rate-sub">12%</div>
+                </div>
+                <label class="toggle-switch" aria-label="Enable tax">
+                  <input type="checkbox" id="tax-enabled" checked />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
+              </div>
+
+              <div class="field-row" id="tax-rate-row">
+                <label class="field-label" for="tax-rate">Tax rate (%)</label>
+                <input type="number" id="tax-rate" class="field-input" value="12" min="0" max="100" step="0.5" aria-label="Tax rate percentage" />
+              </div>
+
+              <div class="toggle-row" id="vat-show-row" style="display:none">
+                <div>
+                  <div class="toggle-label">Show VAT on invoice</div>
+                  <div class="toggle-sub">Hide VAT line in copy/export</div>
+                </div>
+                <label class="toggle-switch" aria-label="Show VAT on invoice">
+                  <input type="checkbox" id="vat-show-invoice" checked />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
+              </div>
+
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Round up totals</div>
+                  <div class="toggle-sub">0.25+ rounds to next peso</div>
+                </div>
+                <label class="toggle-switch" aria-label="Round up totals">
+                  <input type="checkbox" id="round-up" />
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Volume Discounts -->
+            <div class="pricing-card">
+              <div class="pricing-card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Volume Discounts
+              </div>
+
+              <div style="font-size:11px;color:var(--text-2);margin-bottom:10px">
+                Applied to total printed pages (pages × copies)
+              </div>
+
+              <div class="discount-tiers" id="discount-tiers"></div>
+
+              <div id="tier-hint" class="tier-hint" style="display:none"></div>
+
+              <button class="add-tier-btn" id="btn-add-tier" aria-label="Add discount tier">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add tier
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+    </div>
+
+    <!-- Right Panel (Invoice Preview) -->
+    <div class="right-panel">
+      <div class="preview-frame">
+        <div class="preview-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Live Preview
+        </div>
+
+        <!-- Invoice Document — clean SaaS style, no branding/QR/signature -->
+        <div id="invoice-preview">
+
+          <!-- Invoice Header Strip -->
+          <div class="inv-header">
+            <div class="inv-header-left">
+              <div class="inv-title">INVOICE</div>
+              <div class="inv-ref" id="inv-ref">REF# —</div>
+            </div>
+            <div class="inv-header-right">
+              <div class="inv-date" id="inv-date"></div>
+            </div>
+          </div>
+
+          <hr class="inv-divider" />
+
+          <!-- Line Items Table -->
+          <table class="inv-table" aria-label="Invoice line items">
+            <thead>
+              <tr>
+                <th>Document</th>
+                <th class="right" style="width:60px">Paper</th>
+                <th class="right" style="width:50px">Mode</th>
+                <th class="right" style="width:42px">Pg</th>
+                <th class="right" style="width:42px">Qty</th>
+                <th class="right" style="width:72px">Unit</th>
+                <th class="right" style="width:80px">Total</th>
+              </tr>
+            </thead>
+            <tbody id="inv-items-body">
+              <tr>
+                <td colspan="7" style="text-align:center;padding:24px;color:#a09a94;font-size:12px">Upload files to see line items</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <hr class="inv-divider" />
+
+          <!-- Totals Block -->
+          <div class="inv-totals">
+            <div class="inv-totals-inner">
+              <div class="totals-row">
+                <span class="lbl">Subtotal</span>
+                <span class="val" id="inv-subtotal">₱0.00</span>
+              </div>
+              <div class="totals-row discount" id="inv-discount-row" style="display:none">
+                <span class="lbl" id="inv-discount-label">Discount</span>
+                <span class="val" id="inv-discount-val"></span>
+              </div>
+              <div class="totals-row" id="inv-discounted-row" style="display:none">
+                <span class="lbl">Discounted Price</span>
+                <span class="val" id="inv-discounted-val"></span>
+              </div>
+              <div class="totals-row" id="inv-tax-row" style="display:none">
+                <span class="lbl" id="inv-tax-label">Tax / VAT</span>
+                <span class="val" id="inv-tax-val"></span>
+              </div>
+              <div class="totals-row grand">
+                <span class="lbl">Grand Total</span>
+                <span class="val" id="inv-grand-total" aria-live="polite" aria-label="Grand total">₱0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Remarks (hidden when empty) -->
+          <div id="inv-remarks-block" style="display:none">
+            <hr class="inv-divider" />
+            <div class="inv-remarks">
+              <div class="inv-remarks-label">Remarks</div>
+              <div class="inv-remarks-text" id="inv-remarks-text"></div>
+            </div>
+          </div>
+
+          <!-- Minimal footer -->
+          <div class="inv-footer">
+            <div class="inv-footer-center">System-generated document · PrintBill</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Mobile Preview FAB -->
+<button class="preview-fab" id="preview-fab" aria-label="Toggle invoice preview">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+  Preview
+</button>
+
+<!-- Mobile Preview Modal -->
+<div class="preview-modal" id="preview-modal" role="dialog" aria-modal="true" aria-label="Invoice preview">
+  <div class="preview-modal-inner">
+    <div class="preview-modal-header">
+      <div class="preview-modal-title">Invoice Preview</div>
+      <button class="drawer-close-btn" id="preview-modal-close" aria-label="Close preview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="preview-modal-content"></div>
+  </div>
+</div>
+
+<!-- Settings Drawer -->
+<div class="drawer-overlay" id="drawer-overlay"></div>
+<aside class="settings-drawer" id="settings-drawer" role="dialog" aria-modal="true" aria-label="Settings">
+  <div class="drawer-header">
+    <div class="drawer-title">Settings</div>
+    <button class="drawer-close-btn" id="drawer-close" aria-label="Close settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div class="drawer-body">
+    <!-- Hidden dummy inputs to preserve JS compatibility -->
+    <input type="hidden" id="s-shop-name" /><input type="hidden" id="s-shop-address" /><input type="hidden" id="s-shop-phone" /><input type="hidden" id="s-shop-email" /><input type="hidden" id="s-payment-terms" />
+
+    <!-- Invoice Defaults -->
+    <div>
+      <div class="drawer-section-title">Invoice Defaults</div>
+      <div class="field-row">
+        <label class="field-label" for="s-tax-rate">Default tax rate (%)</label>
+        <input type="number" id="s-tax-rate" class="field-input" value="12" min="0" max="100" step="0.5" />
+      </div>
+      <div class="field-row">
+        <label class="field-label" for="s-default-copies">Default copies</label>
+        <input type="number" id="s-default-copies" class="field-input" value="1" min="1" />
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div>
+      <div class="drawer-section-title">Danger Zone</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="danger-btn" id="btn-clear-all">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+          Clear all invoice data
+        </button>
+        <button class="danger-btn" id="btn-reset-settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
+          Reset settings to defaults
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-footer">
+    <button class="btn-ghost" id="btn-drawer-cancel" style="flex:1;justify-content:center">Cancel</button>
+    <button class="btn-save" id="btn-save-settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Save Settings
+    </button>
+  </div>
+</aside>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Full Page Drag Drop Overlay -->
+<div id="file-drop-overlay" class="file-drop-overlay">
+  <div class="drop-overlay-content">
+    <div class="drop-overlay-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    </div>
+    <div class="drop-overlay-text">Drop files anywhere to upload</div>
+  </div>
+</div>
+
+<script src="app.js"></script></body>
+</html>
