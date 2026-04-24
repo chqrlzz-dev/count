@@ -981,7 +981,7 @@ async function saveAsPngAsync() {
   }
 }
 
-// ─── Recent Invoices ──────────────────────────────────────────────────────────
+// ─── Recent Invoices & History ────────────────────────────────────────────────
 
 function saveInvoiceToRecentHistory() {
   const totals = computeGrandTotal();
@@ -990,6 +990,10 @@ function saveInvoiceToRecentHistory() {
     date: state.invoiceDate,
     grandTotal: totals.grandTotal,
     itemCount: state.fileItems.length,
+    fileItems: state.fileItems.map(i => ({ fileName: i.fileName, pages: i.pages, copies: i.copies })),
+    isDone: false,
+    isPaid: false,
+    timestamp: Date.now()
   };
 
   const history = readLocalStorage(STORAGE_KEYS.recentInvoices, []);
@@ -998,44 +1002,111 @@ function saveInvoiceToRecentHistory() {
   writeLocalStorage(STORAGE_KEYS.recentInvoices, history);
 }
 
-function renderRecentInvoicesDropdown() {
-  const list = el("recent-list");
+function renderHistoryList() {
+  const container = el("history-list");
   const history = readLocalStorage(STORAGE_KEYS.recentInvoices, []);
 
   if (history.length === 0) {
-    list.innerHTML = '<div class="dropdown-empty">No recent invoices</div>';
+    container.innerHTML = '<div class="dropdown-empty">No recent invoices</div>';
     return;
   }
 
-  list.innerHTML = "";
-  for (const entry of history) {
-    const item = buildElement("div", { className: "dropdown-item" });
-    item.innerHTML = `
-      <div>
-        <div class="dropdown-item-ref">${entry.ref}</div>
-        <div class="dropdown-item-name">${entry.itemCount || 0} item(s)</div>
-        <div class="dropdown-item-date">${entry.date}</div>
+  container.innerHTML = "";
+  history.forEach((entry, idx) => {
+    const item = buildElement("div", { 
+      className: `history-item${entry.isDone ? ' is-done' : ''}${entry.isPaid ? ' is-paid' : ''}`,
+      id: `history-item-${idx}`
+    });
+
+    const fileRows = entry.fileItems ? entry.fileItems.map(f => `
+      <div class="history-file-row">
+        <span class="history-file-name">${truncateText(f.fileName, 24)}</span>
+        <span>${f.pages} pg × ${f.copies}</span>
       </div>
-      <div class="dropdown-item-total">${formatPeso(entry.grandTotal)}</div>
+    `).join('') : '';
+
+    item.innerHTML = `
+      <div class="history-item-header" onclick="toggleHistoryExpanded(${idx})">
+        <div class="history-item-top">
+          <span class="history-item-ref">${entry.ref}</span>
+          <span class="history-item-total">${formatPeso(entry.grandTotal)}</span>
+        </div>
+        <div class="history-item-meta">
+          <span>${entry.date}</span>
+          <span>•</span>
+          <span>${entry.itemCount || 0} items</span>
+        </div>
+      </div>
+      <div class="history-item-body">
+        <div class="history-files">
+          ${fileRows}
+        </div>
+        <div class="history-actions">
+          <button class="btn-history-action${entry.isDone ? ' active-done' : ''}" onclick="toggleHistoryStatus(${idx}, 'isDone')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Done
+          </button>
+          <button class="btn-history-action${entry.isPaid ? ' active-paid' : ''}" onclick="toggleHistoryStatus(${idx}, 'isPaid')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Paid
+          </button>
+        </div>
+      </div>
     `;
-    list.appendChild(item);
+    container.appendChild(item);
+  });
+}
+
+function toggleHistoryExpanded(idx) {
+  const item = el(`history-item-${idx}`);
+  if (item) item.classList.toggle("expanded");
+}
+
+function toggleHistoryStatus(idx, field) {
+  const history = readLocalStorage(STORAGE_KEYS.recentInvoices, []);
+  if (history[idx]) {
+    history[idx][field] = !history[idx][field];
+    writeLocalStorage(STORAGE_KEYS.recentInvoices, history);
+    renderHistoryList();
+    // Keep it expanded after toggle
+    el(`history-item-${idx}`).classList.add("expanded");
+  }
+}
+
+// ─── Drawer Management ───────────────────────────────────────────────────────
+
+function openDrawer(view = "history") {
+  switchDrawerView(view);
+  el("app-drawer").classList.add("open");
+  el("drawer-overlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+  if (view === "history") renderHistoryList();
+  else loadSettingsIntoDrawer();
+}
+
+function closeDrawer() {
+  el("app-drawer").classList.remove("open");
+  el("drawer-overlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+function switchDrawerView(view) {
+  if (view === "history") {
+    el("history-view").style.display = "flex";
+    el("settings-view").style.display = "none";
+    el("tab-history").classList.add("active");
+    el("tab-settings").classList.remove("active");
+    renderHistoryList();
+  } else {
+    el("history-view").style.display = "none";
+    el("settings-view").style.display = "flex";
+    el("tab-history").classList.remove("active");
+    el("tab-settings").classList.add("active");
+    loadSettingsIntoDrawer();
   }
 }
 
 // ─── Settings ────────────────────────────────────────────────────────────────
-
-function openSettingsDrawer() {
-  loadSettingsIntoDrawer();
-  el("settings-drawer").classList.add("open");
-  el("drawer-overlay").classList.add("open");
-  document.body.style.overflow = "hidden";
-}
-
-function closeSettingsDrawer() {
-  el("settings-drawer").classList.remove("open");
-  el("drawer-overlay").classList.remove("open");
-  document.body.style.overflow = "";
-}
 
 function loadSettingsIntoDrawer() {
   const s = state.shopInfo;
@@ -1069,7 +1140,7 @@ function saveSettingsFromDrawer() {
 
   persistSettingsToStorage();
   updateInvoicePreview();
-  closeSettingsDrawer();
+  closeDrawer();
   showToast("Settings saved", "success");
 }
 
@@ -1169,12 +1240,11 @@ function resetSettingsToDefaults() {
   state.discountTiers = structuredClone(DISCOUNT_TIERS_DEFAULT);
   applyLoadedSettingsToUI();
   renderDiscountTiers();
-  closeSettingsDrawer();
+  closeDrawer();
   showToast("Settings reset to defaults", "info");
 }
 
 function clearAllInvoiceData() {
-  if (!confirm("Clear all invoice data? This cannot be undone.")) return;
   state.fileItems = [];
   state.nextItemId = 1;
   state.invoiceRef = generateRef();
@@ -1184,7 +1254,6 @@ function clearAllInvoiceData() {
   el("remarks").value = "";
   updateTotals();
   updateInvoicePreview();
-  showToast("Invoice data cleared", "info");
 }
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
@@ -1240,7 +1309,14 @@ function placeOrder() {
       "success",
     );
     setStatus("Order Placed", "copied");
-    setTimeout(() => setStatus("Ready"), 3000);
+    
+    // Automatically start new invoice as requested
+    setTimeout(() => {
+      clearAllInvoiceData();
+      state.invoiceDate = formatDate(new Date());
+      updateInvoicePreview();
+      setStatus("Ready");
+    }, 2000);
   });
 }
 
@@ -1453,13 +1529,21 @@ function bindExportEvents() {
 }
 
 function bindSettingsEvents() {
-  el("btn-settings").addEventListener("click", openSettingsDrawer);
-  el("drawer-close").addEventListener("click", closeSettingsDrawer);
-  el("drawer-overlay").addEventListener("click", closeSettingsDrawer);
-  el("btn-drawer-cancel").addEventListener("click", closeSettingsDrawer);
+  el("btn-settings-toggle").addEventListener("click", () => openDrawer("settings"));
+  el("drawer-close").addEventListener("click", closeDrawer);
+  el("drawer-overlay").addEventListener("click", closeDrawer);
+  el("btn-drawer-cancel").addEventListener("click", closeDrawer);
   el("btn-save-settings").addEventListener("click", saveSettingsFromDrawer);
-  el("btn-clear-all").addEventListener("click", clearAllInvoiceData);
+  el("btn-clear-all").addEventListener("click", () => {
+    if (!confirm("Clear current invoice data?")) return;
+    clearAllInvoiceData();
+    showToast("Invoice cleared", "info");
+  });
   el("btn-reset-settings").addEventListener("click", resetSettingsToDefaults);
+
+  // Tabs
+  el("tab-history").addEventListener("click", () => switchDrawerView("history"));
+  el("tab-settings").addEventListener("click", () => switchDrawerView("settings"));
 }
 
 /**
@@ -1469,7 +1553,7 @@ function bindNumericInputEvents() {
   document.addEventListener("keydown", (e) => {
     // Only target inputs with type="number"
     if (e.target.tagName === "INPUT" && e.target.type === "number") {
-      // List of keys to allow (Digits, Backspace, Delete, Arrows, Tab, Home, End, Enter)
+      // List of keys to allow (Digits, Backspace, Delete, Arrows, Tab, Home, End, Enter, Period)
       const allowedKeys = [
         "0",
         "1",
@@ -1481,6 +1565,7 @@ function bindNumericInputEvents() {
         "7",
         "8",
         "9",
+        ".",
         "Backspace",
         "Delete",
         "ArrowLeft",
@@ -1504,7 +1589,7 @@ function bindNumericInputEvents() {
   document.addEventListener("paste", (e) => {
     if (e.target.tagName === "INPUT" && e.target.type === "number") {
       const data = e.clipboardData.getData("text");
-      if (!/^\d+$/.test(data)) {
+      if (!/^\d+\.?\d*$/.test(data)) {
         e.preventDefault();
       }
     }
@@ -1518,26 +1603,15 @@ function bindHeaderEvents() {
     toggleKMode(el("header-kmode-toggle").checked);
   });
 
-  el("btn-recent").addEventListener("click", (e) => {
-    e.stopPropagation();
-    renderRecentInvoicesDropdown();
-    el("recent-dropdown").classList.toggle("open");
+  el("btn-recent").addEventListener("click", () => {
+    openDrawer("history");
   });
 
-  el("btn-clear-recent").addEventListener("click", () => {
+  el("btn-clear-recent-history").addEventListener("click", () => {
     if (!confirm("Clear all invoice history?")) return;
     localStorage.removeItem(STORAGE_KEYS.recentInvoices);
-    el("recent-dropdown").classList.remove("open");
+    renderHistoryList();
     showToast("History cleared", "info");
-  });
-
-  document.addEventListener("click", (e) => {
-    if (
-      !el("btn-recent").contains(e.target) &&
-      !el("recent-dropdown").contains(e.target)
-    ) {
-      el("recent-dropdown").classList.remove("open");
-    }
   });
 }
 

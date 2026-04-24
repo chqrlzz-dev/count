@@ -1074,7 +1074,7 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
 
 .inv-footer-center { font-size: 10px; color: #a09a94; }
 
-/* ─── Settings Drawer ─── */
+/* ─── App Drawer (History & Settings) ─── */
 .drawer-overlay {
   position: fixed;
   inset: 0;
@@ -1087,7 +1087,7 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
 
 .drawer-overlay.open { opacity: 1; pointer-events: all; }
 
-.settings-drawer {
+.app-drawer {
   position: fixed;
   top: 0;
   right: 0;
@@ -1103,24 +1103,45 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
   flex-direction: column;
 }
 
-.settings-drawer.open { transform: translateX(0); }
+.app-drawer.open { transform: translateX(0); }
 
 .drawer-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 20px 16px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   background: var(--bg-card);
-  z-index: 1;
+  z-index: 10;
 }
 
-.drawer-title {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 700;
+.drawer-tabs {
+  display: flex;
+  gap: 8px;
+  background: var(--bg-input);
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.drawer-tab {
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.drawer-tab.active {
+  background: var(--bg-card);
+  color: var(--text-1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .drawer-close-btn {
@@ -1142,6 +1163,121 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
 
 .drawer-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 20px; }
 
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-item {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.history-item.is-done { opacity: 0.8; }
+.history-item.is-paid { border-left: 4px solid var(--green); }
+
+.history-item-header {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-item-ref {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.history-item-total {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.history-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-2);
+}
+
+.history-item-body {
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+  display: none;
+}
+
+.history-item.expanded .history-item-body { display: block; }
+
+.history-files {
+  margin-top: 12px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.history-file-row {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-2);
+  padding: 4px 0;
+  border-bottom: 1px dotted var(--border);
+}
+
+.history-file-name { color: var(--text-1); font-weight: 500; }
+
+.history-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.btn-history-action {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-2);
+  transition: all 0.15s;
+}
+
+.btn-history-action.active-done {
+  background: var(--blue-dim);
+  color: var(--blue);
+  border-color: var(--blue);
+}
+
+.btn-history-action.active-paid {
+  background: var(--green-dim);
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.btn-history-action svg { width: 14px; height: 14px; }
+
 .drawer-section-title {
   font-size: 10px;
   font-weight: 700;
@@ -1161,6 +1297,7 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
   position: sticky;
   bottom: 0;
   background: var(--bg-card);
+  z-index: 1;
 }
 
 .btn-save {

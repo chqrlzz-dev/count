@@ -46,24 +46,12 @@
       </div>
 
       <!-- Recent -->
-      <div class="relative">
-        <button class="icon-btn" id="btn-recent" aria-label="Recent invoices" title="Recent invoices">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </button>
-        <div class="dropdown-menu" id="recent-dropdown">
-          <div class="dropdown-header">Recent Invoices</div>
-          <div id="recent-list"></div>
-          <div class="dropdown-footer">
-            <button class="danger-btn" style="width:100%;justify-content:center" id="btn-clear-recent">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-              Clear history
-            </button>
-          </div>
-        </div>
-      </div>
+      <button class="icon-btn" id="btn-recent" aria-label="Order History" title="Order History">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </button>
 
       <!-- Settings -->
-      <button class="icon-btn" id="btn-settings" aria-label="Settings" title="Settings">
+      <button class="icon-btn" id="btn-settings-toggle" aria-label="Settings" title="Settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
 
@@ -416,17 +404,32 @@
   </div>
 </div>
 
-<!-- Settings Drawer -->
+<!-- App Drawer (History & Settings) -->
 <div class="drawer-overlay" id="drawer-overlay"></div>
-<aside class="settings-drawer" id="settings-drawer" role="dialog" aria-modal="true" aria-label="Settings">
+<aside class="app-drawer" id="app-drawer" role="dialog" aria-modal="true" aria-label="App Sidebar">
   <div class="drawer-header">
-    <div class="drawer-title">Settings</div>
-    <button class="drawer-close-btn" id="drawer-close" aria-label="Close settings">
+    <div class="drawer-tabs">
+      <button class="drawer-tab active" id="tab-history">History</button>
+      <button class="drawer-tab" id="tab-settings">Settings</button>
+    </div>
+    <button class="drawer-close-btn" id="drawer-close" aria-label="Close sidebar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
 
-  <div class="drawer-body">
+  <div class="drawer-body" id="history-view">
+    <div class="history-list" id="history-list">
+      <!-- History items will be injected here -->
+    </div>
+    <div class="drawer-footer">
+      <button class="danger-btn" style="width:100%;justify-content:center" id="btn-clear-recent-history">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        Clear all history
+      </button>
+    </div>
+  </div>
+
+  <div class="drawer-body" id="settings-view" style="display:none">
     <!-- Hidden dummy inputs to preserve JS compatibility -->
     <input type="hidden" id="s-shop-name" /><input type="hidden" id="s-shop-address" /><input type="hidden" id="s-shop-phone" /><input type="hidden" id="s-shop-email" /><input type="hidden" id="s-payment-terms" />
 
@@ -449,7 +452,7 @@
       <div style="display:flex;flex-direction:column;gap:8px">
         <button class="danger-btn" id="btn-clear-all">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-          Clear all invoice data
+          Clear current invoice
         </button>
         <button class="danger-btn" id="btn-reset-settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
@@ -457,14 +460,13 @@
         </button>
       </div>
     </div>
-  </div>
-
-  <div class="drawer-footer">
-    <button class="btn-ghost" id="btn-drawer-cancel" style="flex:1;justify-content:center">Cancel</button>
-    <button class="btn-save" id="btn-save-settings">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-      Save Settings
-    </button>
+    <div class="drawer-footer">
+      <button class="btn-ghost" id="btn-drawer-cancel" style="flex:1;justify-content:center">Cancel</button>
+      <button class="btn-save" id="btn-save-settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Settings
+      </button>
+    </div>
   </div>
 </aside>
 
