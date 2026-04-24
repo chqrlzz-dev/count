@@ -36,6 +36,15 @@
     </div>
 
     <div class="header-actions">
+      <!-- K-Mode Toggle (Header) -->
+      <div class="header-kmode-toggle" title="Toggle K-Mode (Friend Rates)">
+        <span class="kmode-label">K-Mode</span>
+        <label class="toggle-switch small" aria-label="Toggle K-Mode">
+          <input type="checkbox" id="header-kmode-toggle" />
+          <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        </label>
+      </div>
+
       <!-- Recent -->
       <div class="relative">
         <button class="icon-btn" id="btn-recent" aria-label="Recent invoices" title="Recent invoices">
@@ -60,7 +69,7 @@
 
       <!-- Theme -->
       <button class="icon-btn" id="btn-theme" aria-label="Toggle theme" title="Toggle theme">
-        <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y2="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
     </div>
@@ -72,49 +81,10 @@
     <!-- Left Panel -->
     <div class="left-panel">
 
-      <!-- Section 01: Remarks & Place Order -->
-      <section class="section-card" id="step-export">
-        <div class="section-header">
-          <span class="section-num">01</span>
-          <span class="section-title">Remarks &amp; Place Order</span>
-        </div>
-        <div class="section-body">
-          <div class="field-row">
-            <label class="field-label" for="remarks">Remarks / Special Instructions</label>
-            <textarea id="remarks" class="remarks-input" rows="3" placeholder="e.g. Rush order, Spiral binding, Colored cover, etc." aria-label="Special remarks or instructions"></textarea>
-          </div>
-
-          <!-- PRIMARY CTA: Place Order -->
-          <button class="btn-primary" id="btn-place-order">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            Place Order
-          </button>
-
-          <div class="export-actions">
-            <button class="btn-ghost" id="btn-copy-image" title="Copy invoice as image (Ctrl+Shift+C)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              Copy as Image
-            </button>
-            <button class="btn-ghost" id="btn-print" aria-label="Print invoice">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-              Print
-            </button>
-            <button class="btn-ghost" id="btn-save-png" aria-label="Save as PNG file">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Save PNG
-            </button>
-            <button class="btn-ghost" id="btn-new-invoice" aria-label="Start new invoice">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-              New Invoice
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section 02: Upload -->
+      <!-- Section 01: Upload (Primary Action) -->
       <section class="section-card" id="step-upload">
         <div class="section-header">
-          <span class="section-num">02</span>
+          <span class="section-num">01</span>
           <span class="section-title">Upload Files</span>
         </div>
         <div class="section-body">
@@ -181,11 +151,11 @@
         </div>
       </section>
 
-      <!-- Section 03: Pricing Configuration (centralized 2×3 matrix) -->
+      <!-- Section 02: Pricing Configuration -->
       <section class="section-card" id="step-pricing">
         <div class="section-header">
-          <span class="section-num">03</span>
-          <span class="section-title">Pricing Configuration</span>
+          <span class="section-num">02</span>
+          <span class="section-title">Pricing &amp; Discounts</span>
         </div>
         <div class="section-body">
 
@@ -204,15 +174,15 @@
               <tbody>
                 <tr>
                   <th class="mode-label">B&amp;W</th>
-                  <td><input type="number" class="matrix-input" id="price-bw-long"  value="3.50" min="0" step="0.50" data-mode="bw"    data-size="long"  aria-label="B&W Long price" /></td>
-                  <td><input type="number" class="matrix-input" id="price-bw-short" value="2.50" min="0" step="0.50" data-mode="bw"    data-size="short" aria-label="B&W Short price" /></td>
-                  <td><input type="number" class="matrix-input" id="price-bw-a4"    value="2.75" min="0" step="0.50" data-mode="bw"    data-size="a4"    aria-label="B&W A4 price" /></td>
+                  <td><input type="number" class="matrix-input" id="price-bw-long"  value="" min="0" step="0.50" data-mode="bw"    data-size="long"  aria-label="B&W Long price" /></td>
+                  <td><input type="number" class="matrix-input" id="price-bw-short" value="" min="0" step="0.50" data-mode="bw"    data-size="short" aria-label="B&W Short price" /></td>
+                  <td><input type="number" class="matrix-input" id="price-bw-a4"    value="" min="0" step="0.50" data-mode="bw"    data-size="a4"    aria-label="B&W A4 price" /></td>
                 </tr>
                 <tr>
                   <th class="mode-label color-mode">Color</th>
-                  <td><input type="number" class="matrix-input" id="price-color-long"  value="4.75" min="0" step="0.50" data-mode="color" data-size="long"  aria-label="Color Long price" /></td>
-                  <td><input type="number" class="matrix-input" id="price-color-short" value="2.50" min="0" step="0.50" data-mode="color" data-size="short" aria-label="Color Short price" /></td>
-                  <td><input type="number" class="matrix-input" id="price-color-a4"    value="3.75" min="0" step="0.50" data-mode="color" data-size="a4"    aria-label="Color A4 price" /></td>
+                  <td><input type="number" class="matrix-input" id="price-color-long"  value="" min="0" step="0.50" data-mode="color" data-size="long"  aria-label="Color Long price" /></td>
+                  <td><input type="number" class="matrix-input" id="price-color-short" value="" min="0" step="0.50" data-mode="color" data-size="short" aria-label="Color Short price" /></td>
+                  <td><input type="number" class="matrix-input" id="price-color-a4"    value="" min="0" step="0.50" data-mode="color" data-size="a4"    aria-label="Color A4 price" /></td>
                 </tr>
               </tbody>
             </table>
@@ -294,6 +264,44 @@
         </div>
       </section>
 
+      <!-- Section 03: Remarks & Finalize -->
+      <section class="section-card" id="step-export">
+        <div class="section-header">
+          <span class="section-num">03</span>
+          <span class="section-title">Remarks &amp; Place Order</span>
+        </div>
+        <div class="section-body">
+          <div class="field-row">
+            <label class="field-label" for="remarks">Remarks / Special Instructions</label>
+            <textarea id="remarks" class="remarks-input" rows="3" placeholder="e.g. Rush order, Spiral binding, Colored cover, etc." aria-label="Special remarks or instructions"></textarea>
+          </div>
+
+          <!-- PRIMARY CTA: Place Order -->
+          <button class="btn-primary" id="btn-place-order">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Place Order &bull; Collect <span id="btn-collect-amount" style="margin-left:4px">₱0.00</span>
+          </button>
+
+          <div class="export-actions">
+            <button class="btn-ghost" id="btn-copy-image" title="Copy invoice as image (Ctrl+Shift+C)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy as Image
+            </button>
+            <button class="btn-ghost" id="btn-print" aria-label="Print invoice">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Print
+            </button>
+            <button class="btn-ghost" id="btn-save-png" aria-label="Save as PNG file">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Save PNG
+            </button>
+            <button class="btn-ghost" id="btn-new-invoice" aria-label="Start new invoice">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              New Invoice
+            </button>
+          </div>
+        </div>
+      </section>
 
     </div>
 

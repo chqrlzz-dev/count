@@ -20,12 +20,19 @@ const PRICING_DEFAULTS = {
   color: { long: 4.75, short: 2.5, a4: 3.75 },
 };
 
+const KAKILALA_PRICING_DEFAULTS = {
+  bw: { long: 2.25, short: 2.0, a4: 2.0 },
+  color: { long: 4.25, short: 3.25, a4: 3.5 },
+};
+
 const STORAGE_KEYS = {
   shopInfo: "ig_shop_info",
   recentInvoices: "ig_recent_invoices",
   settings: "ig_settings",
   theme: "ig_theme",
   pricing: "ig_pricing",
+  pricingStandard: "ig_pricing_standard",
+  pricingKMode: "ig_pricing_kmode",
   fileItems: "ig_file_items",
 };
 
@@ -37,12 +44,15 @@ const state = {
   nextItemId: 1,
   discountTiers: structuredClone(DISCOUNT_TIERS_DEFAULT),
   pricing: structuredClone(PRICING_DEFAULTS),
+  pricingStandard: structuredClone(PRICING_DEFAULTS),
+  pricingKMode: structuredClone(KAKILALA_PRICING_DEFAULTS),
   settings: {
     taxRate: TAX_RATE_DEFAULT,
     isTaxEnabled: true,
     isVatVisibleOnInvoice: true,
     shouldRoundUp: false,
     defaultCopies: DEFAULT_COPIES,
+    isKMode: false,
   },
   shopInfo: {
     name: "Syempre kay Charles",
@@ -153,6 +163,11 @@ function getPricingMatrixValues() {
 
 function syncPricingMatrixToState() {
   state.pricing = getPricingMatrixValues();
+  if (state.settings.isKMode) {
+    state.pricingKMode = structuredClone(state.pricing);
+  } else {
+    state.pricingStandard = structuredClone(state.pricing);
+  }
 }
 
 function applyPricingMatrixToUI() {
@@ -162,6 +177,27 @@ function applyPricingMatrixToUI() {
   el("price-color-long").value = state.pricing.color.long;
   el("price-color-short").value = state.pricing.color.short;
   el("price-color-a4").value = state.pricing.color.a4;
+}
+
+function toggleKMode(enabled) {
+  state.settings.isKMode = enabled;
+  
+  // Switch pricing set
+  state.pricing = structuredClone(enabled ? state.pricingKMode : state.pricingStandard);
+  
+  // Update UI inputs
+  applyPricingMatrixToUI();
+  
+  // Reprice all current items
+  for (const item of state.fileItems) {
+    item.unitPrice = getPriceForItem(item.colorMode, item.paperSize);
+  }
+  
+  refreshAllRows();
+  updateTotals();
+  updateInvoicePreview();
+  
+  showToast(enabled ? "K-Mode Active 🤝" : "Standard Pricing Restored", "info");
 }
 
 // ─── Status Pill ─────────────────────────────────────────────────────────────
@@ -618,6 +654,9 @@ function updateTotals() {
 
   el("tfoot-total-pages").textContent = totalPages;
   el("tfoot-subtotal").textContent = formatPeso(totals.subtotal);
+  
+  // Update "Collect" amount on Place Order button
+  el("btn-collect-amount").textContent = formatPeso(totals.grandTotal);
 
   refreshDiscountTierHighlights(totalPages);
   updateInvoicePreview();
@@ -1042,9 +1081,12 @@ function persistSettingsToStorage() {
     isVatVisibleOnInvoice: state.settings.isVatVisibleOnInvoice,
     shouldRoundUp: state.settings.shouldRoundUp,
     defaultCopies: state.settings.defaultCopies,
+    isKMode: state.settings.isKMode,
     discountTiers: state.discountTiers,
   });
   writeLocalStorage(STORAGE_KEYS.pricing, state.pricing);
+  writeLocalStorage(STORAGE_KEYS.pricingStandard, state.pricingStandard);
+  writeLocalStorage(STORAGE_KEYS.pricingKMode, state.pricingKMode);
   writeLocalStorage(STORAGE_KEYS.fileItems, state.fileItems);
 }
 
@@ -1060,11 +1102,18 @@ function loadSettingsFromStorage() {
       settings.isVatVisibleOnInvoice ?? true;
     state.settings.shouldRoundUp = settings.shouldRoundUp ?? false;
     state.settings.defaultCopies = settings.defaultCopies ?? DEFAULT_COPIES;
+    state.settings.isKMode = settings.isKMode ?? false;
     if (settings.discountTiers) state.discountTiers = settings.discountTiers;
   }
 
   const pricing = readLocalStorage(STORAGE_KEYS.pricing);
   if (pricing) Object.assign(state.pricing, pricing);
+
+  const pricingStandard = readLocalStorage(STORAGE_KEYS.pricingStandard);
+  if (pricingStandard) Object.assign(state.pricingStandard, pricingStandard);
+
+  const pricingKMode = readLocalStorage(STORAGE_KEYS.pricingKMode);
+  if (pricingKMode) Object.assign(state.pricingKMode, pricingKMode);
 
   const savedItems = readLocalStorage(STORAGE_KEYS.fileItems);
   if (savedItems && Array.isArray(savedItems)) {
@@ -1081,6 +1130,7 @@ function applyLoadedSettingsToUI() {
   el("tax-enabled").checked = state.settings.isTaxEnabled;
   el("round-up").checked = state.settings.shouldRoundUp;
   el("vat-show-invoice").checked = state.settings.isVatVisibleOnInvoice;
+  el("header-kmode-toggle").checked = state.settings.isKMode;
   el("tax-rate-sub").textContent = `${state.settings.taxRate}%`;
   el("tax-rate-row").style.display = state.settings.isTaxEnabled
     ? "flex"
@@ -1096,12 +1146,15 @@ function resetSettingsToDefaults() {
   localStorage.removeItem(STORAGE_KEYS.settings);
   localStorage.removeItem(STORAGE_KEYS.shopInfo);
   localStorage.removeItem(STORAGE_KEYS.pricing);
+  localStorage.removeItem(STORAGE_KEYS.pricingStandard);
+  localStorage.removeItem(STORAGE_KEYS.pricingKMode);
   state.settings = {
     taxRate: TAX_RATE_DEFAULT,
     isTaxEnabled: true,
     isVatVisibleOnInvoice: true,
     shouldRoundUp: false,
     defaultCopies: DEFAULT_COPIES,
+    isKMode: false,
   };
   state.shopInfo = {
     name: "Printing Shop",
@@ -1111,6 +1164,8 @@ function resetSettingsToDefaults() {
     paymentTerms: "Due on receipt",
   };
   state.pricing = structuredClone(PRICING_DEFAULTS);
+  state.pricingStandard = structuredClone(PRICING_DEFAULTS);
+  state.pricingKMode = structuredClone(KAKILALA_PRICING_DEFAULTS);
   state.discountTiers = structuredClone(DISCOUNT_TIERS_DEFAULT);
   applyLoadedSettingsToUI();
   renderDiscountTiers();
@@ -1171,12 +1226,17 @@ function placeOrder() {
   }
 
   const totals = computeGrandTotal();
+  
+  // Final confirmation to ensure clarity on collection
+  const collectMsg = `Confirm Order?\n\nTotal to collect: ${formatPeso(totals.grandTotal)}\nItems: ${state.fileItems.length}\nPages: ${computeTotalPrintedPages()}`;
+  if (!confirm(collectMsg)) return;
+
   saveInvoiceToRecentHistory();
 
   // Copy invoice as image and confirm
   copyInvoiceAsImageAsync().then(() => {
     showToast(
-      `✓ Order placed! Total: ${formatPeso(totals.grandTotal)}`,
+      `✓ Order placed! Collect ${formatPeso(totals.grandTotal)}`,
       "success",
     );
     setStatus("Order Placed", "copied");
@@ -1394,7 +1454,12 @@ function bindExportEvents() {
 
 function bindSettingsEvents() {
   el("btn-settings").addEventListener("click", openSettingsDrawer);
-  // ... rest of implementation
+  el("drawer-close").addEventListener("click", closeSettingsDrawer);
+  el("drawer-overlay").addEventListener("click", closeSettingsDrawer);
+  el("btn-drawer-cancel").addEventListener("click", closeSettingsDrawer);
+  el("btn-save-settings").addEventListener("click", saveSettingsFromDrawer);
+  el("btn-clear-all").addEventListener("click", clearAllInvoiceData);
+  el("btn-reset-settings").addEventListener("click", resetSettingsToDefaults);
 }
 
 /**
@@ -1448,6 +1513,10 @@ function bindNumericInputEvents() {
 
 function bindHeaderEvents() {
   el("btn-theme").addEventListener("click", toggleTheme);
+
+  el("header-kmode-toggle").addEventListener("change", () => {
+    toggleKMode(el("header-kmode-toggle").checked);
+  });
 
   el("btn-recent").addEventListener("click", (e) => {
     e.stopPropagation();
