@@ -862,9 +862,9 @@ function updateInvoiceTotals() {
 
   if (prevText !== grandEl.textContent) {
     grandEl.style.transition = "color 0.3s";
-    grandEl.style.color = "#22c55e";
+    grandEl.style.color = "var(--green)";
     setTimeout(() => {
-      grandEl.style.color = "#1a1814";
+      grandEl.style.color = "";
     }, 400);
   }
 

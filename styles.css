@@ -1141,8 +1141,8 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
 .totals-row.grand .val {
   font-family: var(--font-mono-alt);
   font-size: 18px;
-  font-weight: 700;
-  color: var(--text-1);
+  font-weight: 800;
+  color: var(--accent);
 }
 
 .inv-remarks { margin-bottom: 16px; }
