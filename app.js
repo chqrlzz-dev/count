@@ -282,8 +282,7 @@ async function readPdfPageCountAsync(file) {
   if (!pdfjsLib) throw new Error("pdf.js not loaded");
 
   // Set worker source for better performance and reliability
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "lib/pdf.worker.min.js";
 
   const arrayBuffer = await file.arrayBuffer();
   // Using Uint8Array is more robust for pdf.js
