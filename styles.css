@@ -981,26 +981,34 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
   gap: 6px;
 }
 
-/* ─── Invoice Document — Clean SaaS style ─── */
+/* ─── Invoice Document ─── */
 #invoice-preview {
-  background: #ffffff;
-  color: #1a1814;
+  background: var(--bg-card);
+  color: var(--text-1);
   font-family: 'DM Sans', sans-serif;
   padding: 40px 48px;
-  max-width: 794px; /* A4 width at 96dpi */
+  max-width: 794px;
   width: 100%;
-  min-height: auto; /* Changed from 1050px to allow dynamic adjustment */
+  min-height: auto;
   margin: 0 auto;
   border-radius: 4px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--border);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 @media print {
   @page {
     size: A4 portrait;
     margin: 0;
+  }
+  [data-theme] #invoice-preview {
+    background: #ffffff !important;
+    color: #1a1814 !important;
+    border: none !important;
+    box-shadow: none !important;
   }
   body {
     background: #ffffff !important;
@@ -1037,12 +1045,10 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
     min-height: 100% !important;
     padding: 20mm !important;
     border-radius: 0 !important;
-    box-shadow: none !important;
     margin: 0 !important;
     position: relative !important;
   }
 }
-
 
 .inv-header {
   display: flex;
@@ -1051,32 +1057,30 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
   margin-bottom: 20px;
 }
 
-.inv-header-left {}
-
 .inv-title {
   font-family: 'Syne', sans-serif;
   font-size: 28px;
   font-weight: 800;
-  color: #1a1814;
+  color: var(--text-1);
   letter-spacing: -0.03em;
   line-height: 1;
   margin-bottom: 4px;
 }
 
 .inv-ref {
-  font-family: 'Inconsolata', monospace;
+  font-family: var(--font-mono-alt);
   font-size: 12px;
-  color: #6b6560;
+  color: var(--text-2);
 }
 
 .inv-date {
-  font-family: 'Inconsolata', monospace;
+  font-family: var(--font-mono-alt);
   font-size: 12px;
-  color: #6b6560;
+  color: var(--text-2);
   text-align: right;
 }
 
-.inv-divider { border: none; border-top: 1px solid #e4dfd8; margin: 16px 0; }
+.inv-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 
 /* ─── Invoice Table ─── */
 .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
@@ -1087,28 +1091,28 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #a09a94;
+  color: var(--text-3);
   padding: 0 8px 8px;
-  border-bottom: 1px solid #e4dfd8;
+  border-bottom: 1px solid var(--border);
 }
 
 .inv-table th.right { text-align: right; }
 
 .inv-table td {
   padding: 8px 8px;
-  border-bottom: 1px solid #f0ede8;
+  border-bottom: 1px solid var(--border);
   vertical-align: middle;
   font-size: 12px;
 }
 
-.inv-table tr:nth-child(even) td { background: #faf9f7; }
+.inv-table tr:nth-child(even) td { background: var(--bg-input); opacity: 0.8; }
 
-.inv-item-name { font-size: 12px; font-weight: 500; color: #1a1814; }
-.inv-num { font-family: 'Inconsolata', monospace; font-size: 12px; text-align: right; }
-.inv-price { font-family: 'Inconsolata', monospace; font-size: 12px; text-align: right; }
-.inv-total { font-family: var(--font-mono-alt); font-size: 12px; font-weight: 600; text-align: right; }
-.inv-mode { font-size: 10px; text-align: right; }
-.inv-size { font-size: 10px; text-align: right; color: #6b6560; }
+.inv-item-name { font-size: 12px; font-weight: 500; color: var(--text-1); }
+.inv-num { font-family: var(--font-mono-alt); font-size: 12px; text-align: right; color: var(--text-1); }
+.inv-price { font-family: var(--font-mono-alt); font-size: 12px; text-align: right; color: var(--text-1); }
+.inv-total { font-family: var(--font-mono-alt); font-size: 12px; font-weight: 600; text-align: right; color: var(--text-1); }
+.inv-mode { font-size: 10px; text-align: right; color: var(--text-2); }
+.inv-size { font-size: 10px; text-align: right; color: var(--text-2); }
 
 /* ─── Invoice Totals ─── */
 .inv-totals {
@@ -1129,16 +1133,16 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
   font-size: 12px;
 }
 
-.totals-row .lbl { color: #6b6560; }
-.totals-row .val { font-family: var(--font-mono-alt); font-weight: 500; color: #1a1814; }
-.totals-row.discount .val { color: #22c55e; }
-.totals-row.grand { border-top: 1.5px solid #1a1814; padding-top: 10px; margin-top: 6px; }
-.totals-row.grand .lbl { font-weight: 700; font-size: 14px; color: #1a1814; }
+.totals-row .lbl { color: var(--text-2); }
+.totals-row .val { font-family: var(--font-mono-alt); font-weight: 500; color: var(--text-1); }
+.totals-row.discount .val { color: var(--green); }
+.totals-row.grand { border-top: 1.5px solid var(--text-1); padding-top: 10px; margin-top: 6px; }
+.totals-row.grand .lbl { font-weight: 700; font-size: 14px; color: var(--text-1); }
 .totals-row.grand .val {
   font-family: var(--font-mono-alt);
   font-size: 18px;
   font-weight: 700;
-  color: #1a1814;
+  color: var(--text-1);
 }
 
 .inv-remarks { margin-bottom: 16px; }
@@ -1147,18 +1151,18 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: #a09a94;
+  color: var(--text-3);
   margin-bottom: 6px;
 }
-.inv-remarks-text { font-size: 12px; color: #374151; line-height: 1.6; }
+.inv-remarks-text { font-size: 12px; color: var(--text-2); line-height: 1.6; }
 
 .inv-footer {
-  border-top: 1px solid #e4dfd8;
+  border-top: 1px solid var(--border);
   padding-top: 12px;
   text-align: center;
 }
 
-.inv-footer-center { font-size: 10px; color: #a09a94; }
+.inv-footer-center { font-size: 10px; color: var(--text-3); }
 
 /* ─── App Drawer (History & Settings) ─── */
 .drawer-overlay {

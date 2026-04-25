@@ -919,6 +919,7 @@ async function captureInvoiceCanvas() {
   clone.style.minHeight = `${minExportHeight}px`;
 
   const container = document.createElement("div");
+  container.setAttribute("data-theme", "light");
   container.style.cssText = [
     "position:fixed",
     "top:-99999px",
