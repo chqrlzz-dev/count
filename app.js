@@ -211,8 +211,7 @@ function updateClock() {
     timeEl.textContent = now.toLocaleTimeString("en-US", {
       hour12: true,
       hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit"
+      minute: "2-digit"
     });
   }
   
