@@ -209,7 +209,7 @@ function updateClock() {
   
   if (timeEl) {
     timeEl.textContent = now.toLocaleTimeString("en-US", {
-      hour12: false,
+      hour12: true,
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit"
