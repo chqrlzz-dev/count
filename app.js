@@ -202,6 +202,29 @@ function toggleKMode(enabled) {
 
 // ─── Status Pill ─────────────────────────────────────────────────────────────
 
+function updateClock() {
+  const now = new Date();
+  const timeEl = el("clock-time");
+  const dateEl = el("clock-date");
+  
+  if (timeEl) {
+    timeEl.textContent = now.toLocaleTimeString("en-US", {
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+  }
+  
+  if (dateEl) {
+    dateEl.textContent = now.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric"
+    });
+  }
+}
+
 function setStatus(text, type = "ready") {
   const dot = el("status-dot");
   const span = el("status-text");
@@ -1660,6 +1683,10 @@ function init() {
 
   // Set invoice date
   el("inv-date").textContent = `DATE: ${state.invoiceDate}`;
+
+  // Start real-time clock
+  updateClock();
+  setInterval(updateClock, 1000);
 
   // Initial preview render
   updateTotals();
