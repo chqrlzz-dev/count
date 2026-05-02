@@ -955,7 +955,6 @@ async function copyInvoiceAsImageAsync() {
     setStatus("Capturing…", "analyzing");
     const canvas = await captureInvoiceCanvas();
     await attemptCopyCanvasToClipboard(canvas);
-    saveInvoiceToRecentHistory();
     setStatus("Copied!", "copied");
     setTimeout(() => setStatus("Ready"), 2000);
   } catch {
@@ -1013,6 +1012,7 @@ function saveInvoiceToRecentHistory() {
     grandTotal: totals.grandTotal,
     itemCount: state.fileItems.length,
     fileItems: state.fileItems.map(i => ({ fileName: i.fileName, pages: i.pages, copies: i.copies })),
+    remarks: el("remarks").value.trim(),
     isDone: false,
     isPaid: false,
     timestamp: Date.now()
@@ -1022,6 +1022,15 @@ function saveInvoiceToRecentHistory() {
   history.unshift(snapshot);
   if (history.length > MAX_RECENT_INVOICES) history.pop();
   writeLocalStorage(STORAGE_KEYS.recentInvoices, history);
+}
+
+function deleteHistoryItem(idx) {
+  if (!confirm("Remove this item from history?")) return;
+  const history = readLocalStorage(STORAGE_KEYS.recentInvoices, []);
+  history.splice(idx, 1);
+  writeLocalStorage(STORAGE_KEYS.recentInvoices, history);
+  renderHistoryList();
+  showToast("Item removed from history", "info");
 }
 
 function renderHistoryList() {
@@ -1047,6 +1056,13 @@ function renderHistoryList() {
       </div>
     `).join('') : '';
 
+    const remarksHtml = entry.remarks ? `
+      <div class="history-remarks">
+        <div class="history-remarks-label">Remarks:</div>
+        <div class="history-remarks-text">${entry.remarks}</div>
+      </div>
+    ` : '';
+
     item.innerHTML = `
       <div class="history-item-header" onclick="toggleHistoryExpanded(${idx})">
         <div class="history-item-top">
@@ -1063,6 +1079,7 @@ function renderHistoryList() {
         <div class="history-files">
           ${fileRows}
         </div>
+        ${remarksHtml}
         <div class="history-actions">
           <button class="btn-history-action${entry.isDone ? ' active-done' : ''}" onclick="toggleHistoryStatus(${idx}, 'isDone')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
@@ -1071,6 +1088,9 @@ function renderHistoryList() {
           <button class="btn-history-action${entry.isPaid ? ' active-paid' : ''}" onclick="toggleHistoryStatus(${idx}, 'isPaid')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             Paid
+          </button>
+          <button class="btn-history-action danger" onclick="deleteHistoryItem(${idx})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
           </button>
         </div>
       </div>
@@ -1137,8 +1157,16 @@ function loadSettingsIntoDrawer() {
   el("s-shop-phone").value = s.phone;
   el("s-shop-email").value = s.email;
   el("s-payment-terms").value = s.paymentTerms;
-  el("s-tax-rate").value = state.settings.taxRate;
-  el("s-default-copies").value = state.settings.defaultCopies;
+  
+  // These IDs are now the same in the drawer
+  el("tax-rate").value = state.settings.taxRate;
+  el("default-copies").value = state.settings.defaultCopies;
+  el("tax-enabled").checked = state.settings.isTaxEnabled;
+  el("round-up").checked = state.settings.shouldRoundUp;
+  el("vat-show-invoice").checked = state.settings.isVatVisibleOnInvoice;
+  
+  applyPricingMatrixToUI();
+  renderDiscountTiers();
 }
 
 function saveSettingsFromDrawer() {
@@ -1150,17 +1178,17 @@ function saveSettingsFromDrawer() {
     paymentTerms: el("s-payment-terms").value.trim() || "Due on receipt",
   };
 
-  state.settings.taxRate =
-    parseFloat(el("s-tax-rate").value) || TAX_RATE_DEFAULT;
-  state.settings.defaultCopies =
-    parseInt(el("s-default-copies").value) || DEFAULT_COPIES;
+  state.settings.taxRate = parseFloat(el("tax-rate").value) || TAX_RATE_DEFAULT;
+  state.settings.defaultCopies = parseInt(el("default-copies").value) || DEFAULT_COPIES;
+  state.settings.isTaxEnabled = el("tax-enabled").checked;
+  state.settings.shouldRoundUp = el("round-up").checked;
+  state.settings.isVatVisibleOnInvoice = el("vat-show-invoice").checked;
 
-  // Sync to main inputs
-  el("tax-rate").value = state.settings.taxRate;
-  el("default-copies").value = state.settings.defaultCopies;
   el("tax-rate-sub").textContent = `${state.settings.taxRate}%`;
 
+  syncPricingMatrixToState();
   persistSettingsToStorage();
+  updateTotals();
   updateInvoicePreview();
   closeDrawer();
   showToast("Settings saved", "success");

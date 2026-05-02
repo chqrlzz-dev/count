@@ -145,123 +145,10 @@
         </div>
       </section>
 
-      <!-- Section 02: Pricing Configuration -->
-      <section class="section-card" id="step-pricing">
-        <div class="section-header">
-          <span class="section-num">02</span>
-          <span class="section-title">Pricing &amp; Discounts</span>
-        </div>
-        <div class="section-body">
-
-          <!-- Centralized 2×3 Pricing Grid -->
-          <div style="margin-bottom:16px">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-2);margin-bottom:12px">Price per Page (₱) by Paper Size &amp; Color Mode</div>
-            <table class="pricing-matrix" id="pricing-matrix-table" aria-label="Pricing matrix">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Long (Folio)</th>
-                  <th>Short (Letter)</th>
-                  <th>A4</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th class="mode-label">B&amp;W</th>
-                  <td><input type="number" class="matrix-input" id="price-bw-long"  value="" min="0" step="0.50" data-mode="bw"    data-size="long"  aria-label="B&W Long price" /></td>
-                  <td><input type="number" class="matrix-input" id="price-bw-short" value="" min="0" step="0.50" data-mode="bw"    data-size="short" aria-label="B&W Short price" /></td>
-                  <td><input type="number" class="matrix-input" id="price-bw-a4"    value="" min="0" step="0.50" data-mode="bw"    data-size="a4"    aria-label="B&W A4 price" /></td>
-                </tr>
-                <tr>
-                  <th class="mode-label color-mode">Color</th>
-                  <td><input type="number" class="matrix-input" id="price-color-long"  value="" min="0" step="0.50" data-mode="color" data-size="long"  aria-label="Color Long price" /></td>
-                  <td><input type="number" class="matrix-input" id="price-color-short" value="" min="0" step="0.50" data-mode="color" data-size="short" aria-label="Color Short price" /></td>
-                  <td><input type="number" class="matrix-input" id="price-color-a4"    value="" min="0" step="0.50" data-mode="color" data-size="a4"    aria-label="Color A4 price" /></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="pricing-grid">
-            <!-- Tax / Toggles -->
-            <div class="pricing-card">
-              <div class="pricing-card-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                Tax &amp; Rounding
-              </div>
-
-              <div class="field-row">
-                <label class="field-label" for="default-copies">Default copies per file</label>
-                <input type="number" id="default-copies" class="field-input" value="1" min="1" step="1" aria-label="Default number of copies" />
-              </div>
-
-              <div class="toggle-row">
-                <div>
-                  <div class="toggle-label">Tax / VAT</div>
-                  <div class="toggle-sub" id="tax-rate-sub">12%</div>
-                </div>
-                <label class="toggle-switch" aria-label="Enable tax">
-                  <input type="checkbox" id="tax-enabled" checked />
-                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
-                </label>
-              </div>
-
-              <div class="field-row" id="tax-rate-row">
-                <label class="field-label" for="tax-rate">Tax rate (%)</label>
-                <input type="number" id="tax-rate" class="field-input" value="12" min="0" max="100" step="0.5" aria-label="Tax rate percentage" />
-              </div>
-
-              <div class="toggle-row" id="vat-show-row" style="display:none">
-                <div>
-                  <div class="toggle-label">Show VAT on invoice</div>
-                  <div class="toggle-sub">Hide VAT line in copy/export</div>
-                </div>
-                <label class="toggle-switch" aria-label="Show VAT on invoice">
-                  <input type="checkbox" id="vat-show-invoice" checked />
-                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
-                </label>
-              </div>
-
-              <div class="toggle-row">
-                <div>
-                  <div class="toggle-label">Round up totals</div>
-                  <div class="toggle-sub">0.25+ rounds to next peso</div>
-                </div>
-                <label class="toggle-switch" aria-label="Round up totals">
-                  <input type="checkbox" id="round-up" />
-                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
-                </label>
-              </div>
-            </div>
-
-            <!-- Volume Discounts -->
-            <div class="pricing-card">
-              <div class="pricing-card-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                Volume Discounts
-              </div>
-
-              <div style="font-size:11px;color:var(--text-2);margin-bottom:10px">
-                Applied to total printed pages (pages × copies)
-              </div>
-
-              <div class="discount-tiers" id="discount-tiers"></div>
-
-              <div id="tier-hint" class="tier-hint" style="display:none"></div>
-
-              <button class="add-tier-btn" id="btn-add-tier" aria-label="Add discount tier">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Add tier
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section 03: Remarks & Finalize -->
+      <!-- Section 02: Remarks & Finalize -->
       <section class="section-card" id="step-export">
         <div class="section-header">
-          <span class="section-num">03</span>
+          <span class="section-num">02</span>
           <span class="section-title">Remarks &amp; Place Order</span>
         </div>
         <div class="section-body">
@@ -439,17 +326,92 @@
     <!-- Hidden dummy inputs to preserve JS compatibility -->
     <input type="hidden" id="s-shop-name" /><input type="hidden" id="s-shop-address" /><input type="hidden" id="s-shop-phone" /><input type="hidden" id="s-shop-email" /><input type="hidden" id="s-payment-terms" />
 
-    <!-- Invoice Defaults -->
+    <!-- Pricing Matrix -->
     <div>
-      <div class="drawer-section-title">Invoice Defaults</div>
+      <div class="drawer-section-title">Pricing Matrix (₱)</div>
+      <table class="pricing-matrix" id="pricing-matrix-table" aria-label="Pricing matrix">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Long</th>
+            <th>Short</th>
+            <th>A4</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th class="mode-label">B&amp;W</th>
+            <td><input type="number" class="matrix-input" id="price-bw-long"  value="" min="0" step="0.50" data-mode="bw"    data-size="long" /></td>
+            <td><input type="number" class="matrix-input" id="price-bw-short" value="" min="0" step="0.50" data-mode="bw"    data-size="short" /></td>
+            <td><input type="number" class="matrix-input" id="price-bw-a4"    value="" min="0" step="0.50" data-mode="bw"    data-size="a4" /></td>
+          </tr>
+          <tr>
+            <th class="mode-label color-mode">Color</th>
+            <td><input type="number" class="matrix-input" id="price-color-long"  value="" min="0" step="0.50" data-mode="color" data-size="long" /></td>
+            <td><input type="number" class="matrix-input" id="price-color-short" value="" min="0" step="0.50" data-mode="color" data-size="short" /></td>
+            <td><input type="number" class="matrix-input" id="price-color-a4"    value="" min="0" step="0.50" data-mode="color" data-size="a4" /></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tax & Rounding -->
+    <div>
+      <div class="drawer-section-title">Tax &amp; Rounding</div>
       <div class="field-row">
-        <label class="field-label" for="s-tax-rate">Default tax rate (%)</label>
-        <input type="number" id="s-tax-rate" class="field-input" value="12" min="0" max="100" step="0.5" />
+        <label class="field-label" for="default-copies">Default copies per file</label>
+        <input type="number" id="default-copies" class="field-input" value="1" min="1" step="1" />
       </div>
-      <div class="field-row">
-        <label class="field-label" for="s-default-copies">Default copies</label>
-        <input type="number" id="s-default-copies" class="field-input" value="1" min="1" />
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Tax / VAT</div>
+          <div class="toggle-sub" id="tax-rate-sub">12%</div>
+        </div>
+        <label class="toggle-switch" aria-label="Enable tax">
+          <input type="checkbox" id="tax-enabled" checked />
+          <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        </label>
       </div>
+
+      <div class="field-row" id="tax-rate-row">
+        <label class="field-label" for="tax-rate">Tax rate (%)</label>
+        <input type="number" id="tax-rate" class="field-input" value="12" min="0" max="100" step="0.5" />
+      </div>
+
+      <div class="toggle-row" id="vat-show-row" style="display:none">
+        <div>
+          <div class="toggle-label">Show VAT on invoice</div>
+          <div class="toggle-sub">Hide VAT line in copy/export</div>
+        </div>
+        <label class="toggle-switch" aria-label="Show VAT on invoice">
+          <input type="checkbox" id="vat-show-invoice" checked />
+          <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Round up totals</div>
+          <div class="toggle-sub">0.25+ rounds to next peso</div>
+        </div>
+        <label class="toggle-switch" aria-label="Round up totals">
+          <input type="checkbox" id="round-up" />
+          <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Volume Discounts -->
+    <div>
+      <div class="drawer-section-title">Volume Discounts</div>
+      <div style="font-size:11px;color:var(--text-2);margin-bottom:10px">Applied to total printed pages</div>
+      <div class="discount-tiers" id="discount-tiers"></div>
+      <div id="tier-hint" class="tier-hint" style="display:none"></div>
+      <button class="add-tier-btn" id="btn-add-tier" style="margin-top:8px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add tier
+      </button>
     </div>
 
     <!-- Danger Zone -->
