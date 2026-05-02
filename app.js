@@ -213,6 +213,66 @@ function toggleKMode(enabled) {
   showToast(enabled ? "K-Mode Active 🤝" : "Standard Pricing Restored", "info");
 }
 
+// ─── Modal System ───────────────────────────────────────────────────────────
+
+/**
+ * Global modal function to replace alert() and confirm()
+ * @param {Object} options { title, body, type, confirmText, cancelText, onConfirm, onCancel }
+ */
+function showModal(options = {}) {
+  const overlay = el("global-modal-overlay");
+  const titleEl = el("global-modal-title");
+  const bodyEl = el("global-modal-body");
+  const footerEl = el("global-modal-footer");
+
+  titleEl.textContent = options.title || "Notification";
+  bodyEl.textContent = options.body || "";
+  footerEl.innerHTML = "";
+
+  const type = options.type || "info"; // info, confirm, danger
+
+  if (type === "confirm" || type === "danger") {
+    const cancelBtn = buildElement("button", {
+      className: "modal-btn modal-btn-secondary",
+      textContent: options.cancelText || "Cancel",
+    });
+    cancelBtn.onclick = () => {
+      closeModal();
+      if (options.onCancel) options.onCancel();
+    };
+    footerEl.appendChild(cancelBtn);
+  }
+
+  const confirmBtn = buildElement("button", {
+    className: `modal-btn ${type === "danger" ? "modal-btn-danger" : "modal-btn-primary"}`,
+    textContent: options.confirmText || "OK",
+  });
+  confirmBtn.onclick = () => {
+    closeModal();
+    if (options.onConfirm) options.onConfirm();
+  };
+  footerEl.appendChild(confirmBtn);
+
+  overlay.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal() {
+  el("global-modal-overlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+function bindModalEvents() {
+  el("global-modal-close").onclick = closeModal;
+  el("global-modal-overlay").onclick = (e) => {
+    if (e.target === el("global-modal-overlay")) closeModal();
+  };
+  // ESC key to close
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+}
+
 // ─── Status Pill ─────────────────────────────────────────────────────────────
 
 function updateClock() {
@@ -1053,6 +1113,8 @@ function saveInvoiceToRecentHistory() {
       pages: i.pages,
       copies: i.copies,
       fileSize: i.fileSize,
+      paperSize: i.paperSize,
+      colorMode: i.colorMode,
     })),
     remarks: el("remarks").value.trim(),
     isDone: false,
@@ -1067,12 +1129,19 @@ function saveInvoiceToRecentHistory() {
 }
 
 function deleteHistoryItem(idx) {
-  if (!confirm("Remove this item from history?")) return;
-  const history = readLocalStorage(STORAGE_KEYS.recentInvoices, []);
-  history.splice(idx, 1);
-  writeLocalStorage(STORAGE_KEYS.recentInvoices, history);
-  renderHistoryList();
-  showToast("Item removed from history", "info");
+  showModal({
+    title: "Remove History Item",
+    body: "Are you sure you want to remove this item from your history?",
+    type: "danger",
+    confirmText: "Remove",
+    onConfirm: () => {
+      const history = readLocalStorage(STORAGE_KEYS.recentInvoices, []);
+      history.splice(idx, 1);
+      writeLocalStorage(STORAGE_KEYS.recentInvoices, history);
+      renderHistoryList();
+      showToast("Item removed from history", "info");
+    },
+  });
 }
 
 function renderHistoryList() {
@@ -1096,11 +1165,18 @@ function renderHistoryList() {
       ? entry.fileItems
           .map((f) => {
             const sizeStr = f.fileSize ? ` <span class="history-file-size">(${formatSize(f.fileSize)})</span>` : "";
+            const paperLabel = { long: "Long", short: "Short", a4: "A4" }[f.paperSize] || "Short";
+            const modeLabel = f.colorMode === "color" ? "Color" : "B&W";
+            
             return `
       <div class="history-file-row">
         <div class="history-file-info">
           <span class="history-file-name">${truncateText(f.fileName, 24)}</span>
-          ${sizeStr}
+          <div style="display:flex;gap:4px;align-items:center">
+            <span class="meta-pill" style="font-size:8px;padding:1px 4px;background:var(--bg-card);border:1px solid var(--border)">${paperLabel}</span>
+            <span class="meta-pill" style="font-size:8px;padding:1px 4px;background:var(--bg-card);border:1px solid var(--border)">${modeLabel}</span>
+            ${sizeStr}
+          </div>
         </div>
         <span class="history-file-calc">${f.pages} pg × ${f.copies} qty</span>
       </div>
@@ -1322,35 +1398,42 @@ function applyLoadedSettingsToUI() {
 }
 
 function resetSettingsToDefaults() {
-  if (!confirm("Reset all settings to defaults?")) return;
-  localStorage.removeItem(STORAGE_KEYS.settings);
-  localStorage.removeItem(STORAGE_KEYS.shopInfo);
-  localStorage.removeItem(STORAGE_KEYS.pricing);
-  localStorage.removeItem(STORAGE_KEYS.pricingStandard);
-  localStorage.removeItem(STORAGE_KEYS.pricingKMode);
-  state.settings = {
-    taxRate: TAX_RATE_DEFAULT,
-    isTaxEnabled: true,
-    isVatVisibleOnInvoice: true,
-    shouldRoundUp: false,
-    defaultCopies: DEFAULT_COPIES,
-    isKMode: false,
-  };
-  state.shopInfo = {
-    name: "Printing Shop",
-    address: "",
-    phone: "",
-    email: "",
-    paymentTerms: "Due on receipt",
-  };
-  state.pricing = structuredClone(PRICING_DEFAULTS);
-  state.pricingStandard = structuredClone(PRICING_DEFAULTS);
-  state.pricingKMode = structuredClone(KAKILALA_PRICING_DEFAULTS);
-  state.discountTiers = structuredClone(DISCOUNT_TIERS_DEFAULT);
-  applyLoadedSettingsToUI();
-  renderDiscountTiers();
-  closeDrawer();
-  showToast("Settings reset to defaults", "info");
+  showModal({
+    title: "Reset Settings",
+    body: "Are you sure you want to reset all settings to their defaults? This cannot be undone.",
+    type: "danger",
+    confirmText: "Reset Defaults",
+    onConfirm: () => {
+      localStorage.removeItem(STORAGE_KEYS.settings);
+      localStorage.removeItem(STORAGE_KEYS.shopInfo);
+      localStorage.removeItem(STORAGE_KEYS.pricing);
+      localStorage.removeItem(STORAGE_KEYS.pricingStandard);
+      localStorage.removeItem(STORAGE_KEYS.pricingKMode);
+      state.settings = {
+        taxRate: TAX_RATE_DEFAULT,
+        isTaxEnabled: true,
+        isVatVisibleOnInvoice: true,
+        shouldRoundUp: false,
+        defaultCopies: DEFAULT_COPIES,
+        isKMode: false,
+      };
+      state.shopInfo = {
+        name: "Printing Shop",
+        address: "",
+        phone: "",
+        email: "",
+        paymentTerms: "Due on receipt",
+      };
+      state.pricing = structuredClone(PRICING_DEFAULTS);
+      state.pricingStandard = structuredClone(PRICING_DEFAULTS);
+      state.pricingKMode = structuredClone(KAKILALA_PRICING_DEFAULTS);
+      state.discountTiers = structuredClone(DISCOUNT_TIERS_DEFAULT);
+      applyLoadedSettingsToUI();
+      renderDiscountTiers();
+      closeDrawer();
+      showToast("Settings reset to defaults", "info");
+    },
+  });
 }
 
 function clearAllInvoiceData() {
@@ -1406,26 +1489,33 @@ function placeOrder() {
   const totals = computeGrandTotal();
 
   // Final confirmation to ensure clarity on collection
-  const collectMsg = `Confirm Order?\n\nTotal to collect: ${formatPeso(totals.grandTotal)}\nItems: ${state.fileItems.length}\nPages: ${computeTotalPrintedPages()}`;
-  if (!confirm(collectMsg)) return;
+  const collectMsg = `Total to collect: ${formatPeso(totals.grandTotal)}\nItems: ${state.fileItems.length}\nPages: ${computeTotalPrintedPages()}`;
+  
+  showModal({
+    title: "Confirm Order",
+    body: collectMsg,
+    type: "confirm",
+    confirmText: "Place Order",
+    onConfirm: () => {
+      saveInvoiceToRecentHistory();
 
-  saveInvoiceToRecentHistory();
+      // Copy invoice as image and confirm
+      copyInvoiceAsImageAsync().then(() => {
+        showToast(
+          `✓ Order placed! Collect ${formatPeso(totals.grandTotal)}`,
+          "success",
+        );
+        setStatus("Order Placed", "copied");
 
-  // Copy invoice as image and confirm
-  copyInvoiceAsImageAsync().then(() => {
-    showToast(
-      `✓ Order placed! Collect ${formatPeso(totals.grandTotal)}`,
-      "success",
-    );
-    setStatus("Order Placed", "copied");
-
-    // Automatically start new invoice as requested
-    setTimeout(() => {
-      clearAllInvoiceData();
-      state.invoiceDate = formatDate(new Date());
-      updateInvoicePreview();
-      setStatus("Ready");
-    }, 2000);
+        // Automatically start new invoice as requested
+        setTimeout(() => {
+          clearAllInvoiceData();
+          state.invoiceDate = formatDate(new Date());
+          updateInvoicePreview();
+          setStatus("Ready");
+        }, 2000);
+      });
+    }
   });
 }
 
@@ -1611,11 +1701,17 @@ function bindExportEvents() {
   el("btn-print").addEventListener("click", () => window.print());
   el("btn-save-png").addEventListener("click", saveAsPngAsync);
   el("btn-new-invoice").addEventListener("click", () => {
-    if (!confirm("Start a new invoice? Current data will be cleared.")) return;
-    clearAllInvoiceData();
-    state.invoiceRef = generateRef();
-    state.invoiceDate = formatDate(new Date());
-    updateInvoicePreview();
+    showModal({
+      title: "New Invoice",
+      body: "Start a new invoice? Current data will be cleared.",
+      type: "confirm",
+      onConfirm: () => {
+        clearAllInvoiceData();
+        state.invoiceRef = generateRef();
+        state.invoiceDate = formatDate(new Date());
+        updateInvoicePreview();
+      }
+    });
   });
 
   el("btn-add-item").addEventListener("click", addManualItem);
@@ -1628,9 +1724,15 @@ function bindExportEvents() {
     updateInvoicePreview();
   });
   el("btn-clear-table").addEventListener("click", () => {
-    if (!confirm("Clear all items from this invoice?")) return;
-    clearAllInvoiceData();
-    showToast("Invoice cleared", "info");
+    showModal({
+      title: "Clear Invoice",
+      body: "Are you sure you want to clear all items from this invoice?",
+      type: "danger",
+      onConfirm: () => {
+        clearAllInvoiceData();
+        showToast("Invoice cleared", "info");
+      }
+    });
   });
 
   el("remarks").addEventListener("input", updateInvoiceRemarks);
@@ -1653,9 +1755,15 @@ function bindSettingsEvents() {
   el("btn-drawer-cancel").addEventListener("click", closeDrawer);
   el("btn-save-settings").addEventListener("click", saveSettingsFromDrawer);
   el("btn-clear-all").addEventListener("click", () => {
-    if (!confirm("Clear current invoice data?")) return;
-    clearAllInvoiceData();
-    showToast("Invoice cleared", "info");
+    showModal({
+      title: "Clear Invoice",
+      body: "Are you sure you want to clear the current invoice data?",
+      type: "danger",
+      onConfirm: () => {
+        clearAllInvoiceData();
+        showToast("Invoice cleared", "info");
+      }
+    });
   });
   el("btn-reset-settings").addEventListener("click", resetSettingsToDefaults);
 
@@ -1730,10 +1838,16 @@ function bindHeaderEvents() {
   });
 
   el("btn-clear-recent-history").addEventListener("click", () => {
-    if (!confirm("Clear all invoice history?")) return;
-    localStorage.removeItem(STORAGE_KEYS.recentInvoices);
-    renderHistoryList();
-    showToast("History cleared", "info");
+    showModal({
+      title: "Clear History",
+      body: "Are you sure you want to clear all invoice history? This cannot be undone.",
+      type: "danger",
+      onConfirm: () => {
+        localStorage.removeItem(STORAGE_KEYS.recentInvoices);
+        renderHistoryList();
+        showToast("History cleared", "info");
+      }
+    });
   });
 }
 
@@ -1792,6 +1906,7 @@ function init() {
   updateInvoicePreview();
 
   // Bind all events
+  bindModalEvents();
   bindDropZoneEvents();
   bindFileTableEvents();
   bindPricingMatrixEvents();
