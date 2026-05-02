@@ -618,7 +618,62 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
   border-color: var(--border-strong);
 }
 
+.btn-secondary.danger-hover:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: var(--red-dim);
+}
+
 .btn-secondary svg { width: 13px; height: 13px; }
+
+/* ─── Invoice Bottom Section & QR ─── */
+.inv-bottom-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: auto;
+  padding-top: 24px;
+  gap: 20px;
+}
+
+.inv-info-text {
+  flex: 1;
+  font-size: 11px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.inv-qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .inv-qr-container {
+  background: #ffffff; /* QR container always white for scanning */
+  border-color: #e4dfd8;
+}
+
+.inv-qr-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #1a1814; /* Always dark for readability on white bg */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.inv-qr-image {
+  width: 120px;
+  height: 120px;
+  display: block;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
 
 /* ─── Pricing Matrix Table ─── */
 .pricing-matrix {

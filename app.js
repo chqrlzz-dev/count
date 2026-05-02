@@ -7,6 +7,8 @@ const DOCX_BYTES_PER_PAGE = 2400;
 const COPY_IMAGE_SCALE = 2;
 const INVOICE_EXPORT_WIDTH_PX = 680;
 const TOAST_DURATION_MS = 2500;
+const GCASH_QR_B64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="; // Placeholder: Replace with your full B64 string
+
 const DISCOUNT_TIERS_DEFAULT = [
   { minPages: 25, discountPct: 5 },
   { minPages: 50, discountPct: 10 },
@@ -793,6 +795,10 @@ function updateInvoicePreview() {
   updateInvoiceTotals();
   updateInvoiceRemarks();
 
+  // Set QR Code
+  const qrImg = el("inv-qr-image");
+  if (qrImg) qrImg.src = GCASH_QR_B64;
+
   // ─── Dynamic Portrait Adjustment ───
   // We want the invoice to always feel like a "portrait" document (height > width).
   // The height should grow as more files are added, but never be shorter than a
@@ -907,15 +913,15 @@ async function captureInvoiceCanvas() {
   const previewEl = el("invoice-preview");
   const clone = previewEl.cloneNode(true);
 
-  // Apply dynamic portrait styles to the clone for a perfect export
+  // Apply styles to the clone for a perfect export
   clone.style.boxShadow = "none";
   clone.style.borderRadius = "0";
   clone.style.margin = "0";
   clone.style.width = `${INVOICE_EXPORT_WIDTH_PX}px`;
 
-  // Standard portrait ratio (A4 is 1.41)
-  const minExportHeight = INVOICE_EXPORT_WIDTH_PX * 1.41;
-  clone.style.minHeight = `${minExportHeight}px`;
+  // DYNAMIC HEIGHT: We want the height to be exactly what's needed for the content
+  clone.style.height = "auto";
+  clone.style.minHeight = "auto";
 
   const container = document.createElement("div");
   container.setAttribute("data-theme", "light");
@@ -936,13 +942,19 @@ async function captureInvoiceCanvas() {
   document.body.appendChild(container);
 
   try {
+    // Wait for images (QR) to load in the clone
+    const images = clone.getElementsByTagName('img');
+    await Promise.all(Array.from(images).map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
+    }));
+
     const canvas = await html2canvas(container, {
-      scale: COPY_IMAGE_SCALE,
+      scale: COPY_IMAGE_SCALE + 1, // High definition fidelity (3x)
       useCORS: true,
       backgroundColor: "#ffffff",
       logging: false,
       width: INVOICE_EXPORT_WIDTH_PX,
-      windowWidth: INVOICE_EXPORT_WIDTH_PX,
     });
     return canvas;
   } finally {
@@ -1565,6 +1577,11 @@ function bindExportEvents() {
     refreshAllRows();
     updateTotals();
     updateInvoicePreview();
+  });
+  el("btn-clear-table").addEventListener("click", () => {
+    if (!confirm("Clear all items from this invoice?")) return;
+    clearAllInvoiceData();
+    showToast("Invoice cleared", "info");
   });
 
   el("remarks").addEventListener("input", updateInvoiceRemarks);
