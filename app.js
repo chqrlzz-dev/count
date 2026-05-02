@@ -125,6 +125,13 @@ function truncateText(text, maxLen) {
   return text.length > maxLen ? text.slice(0, maxLen) + "…" : text;
 }
 
+function formatSize(bytes) {
+  if (!bytes) return "";
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / 1048576).toFixed(1) + " MB";
+}
+
 function readLocalStorage(key, fallback = null) {
   try {
     const raw = localStorage.getItem(key);
@@ -405,6 +412,7 @@ async function processUploadedFileAsync(file) {
     id: itemId,
     fileName,
     fileExt: ext,
+    fileSize: file.size,
     pages: 0,
     copies,
     colorMode,
@@ -507,10 +515,14 @@ function refreshItemRow(id) {
     { long: "Long", short: "Short", a4: "A4" }[item.paperSize] || "Short";
   const modeLabel = item.colorMode === "color" ? "Color" : "B&W";
 
+  const nameContent = item.isManual
+    ? `<input type="text" class="row-name-input" value="${item.fileName}" data-id="${id}" data-field="fileName" />`
+    : `<span class="file-name-text" title="${item.fileName}">${item.fileName}</span>`;
+
   tr.innerHTML = `
     <td style="color:var(--text-3);font-size:12px;font-family:var(--font-mono)">${rowIndex}</td>
     <td class="file-name-cell">
-      <span class="file-name-text" title="${item.fileName}">${item.fileName}</span>
+      ${nameContent}
       <div class="file-meta">${fileTypePill}${metaPills}${isActive ? '<span class="meta-pill pill-discount">✦ Tier</span>' : ""}</div>
     </td>
     <td>
@@ -1040,6 +1052,7 @@ function saveInvoiceToRecentHistory() {
       fileName: i.fileName,
       pages: i.pages,
       copies: i.copies,
+      fileSize: i.fileSize,
     })),
     remarks: el("remarks").value.trim(),
     isDone: false,
@@ -1081,22 +1094,29 @@ function renderHistoryList() {
 
     const fileRows = entry.fileItems
       ? entry.fileItems
-          .map(
-            (f) => `
+          .map((f) => {
+            const sizeStr = f.fileSize ? ` <span class="history-file-size">(${formatSize(f.fileSize)})</span>` : "";
+            return `
       <div class="history-file-row">
-        <span class="history-file-name">${truncateText(f.fileName, 24)}</span>
-        <span>${f.pages} pg × ${f.copies}</span>
+        <div class="history-file-info">
+          <span class="history-file-name">${truncateText(f.fileName, 24)}</span>
+          ${sizeStr}
+        </div>
+        <span class="history-file-calc">${f.pages} pg × ${f.copies} qty</span>
       </div>
-    `,
-          )
+    `;
+          })
           .join("")
       : "";
 
     const remarksHtml = entry.remarks
       ? `
       <div class="history-remarks">
-        <div class="history-remarks-label">Remarks:</div>
-        <div class="history-remarks-text">${entry.remarks}</div>
+        <div class="history-remarks-header">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+           <span>Special Instructions</span>
+        </div>
+        <div class="history-remarks-content">${entry.remarks}</div>
       </div>
     `
       : "";
@@ -1493,6 +1513,8 @@ function bindFileTableEvents() {
       item.isPageExact = true;
       item.needsPageEntry = item.pages < 1;
       input.className = item.needsPageEntry ? "num-input warn" : "num-input";
+    } else if (field === "fileName") {
+      item.fileName = input.value || "Custom Item";
     } else if (field === "copies") {
       item.copies = parseInt(input.value) || 1;
     } else if (field === "paperSize") {
