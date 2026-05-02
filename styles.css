@@ -647,29 +647,34 @@ input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  background: white;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
+  gap: 4px;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  border: none;
 }
 
 [data-theme="dark"] .inv-qr-container {
-  background: #ffffff; /* QR container always white for scanning */
-  border-color: #e4dfd8;
+  background: transparent;
+  border-color: transparent;
 }
 
 .inv-qr-label {
-  font-size: 9px;
-  font-weight: 700;
-  color: #1a1814; /* Always dark for readability on white bg */
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-1);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+[data-theme="light"] .inv-qr-label {
+  color: #1a1814;
 }
 
 .inv-qr-image {
   width: 120px;
   height: 120px;
+  aspect-ratio: 1 / 1;
   display: block;
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
