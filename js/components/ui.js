@@ -36,10 +36,10 @@ function showModal(options = {}) {
       className: "modal-btn modal-btn-secondary",
       textContent: options.cancelText || "Cancel",
     });
-    cancelBtn.onclick = () => {
+    cancelBtn.addEventListener("click", () => {
       closeModal();
       if (options.onCancel) options.onCancel();
-    };
+    });
     footerEl.appendChild(cancelBtn);
   }
 
@@ -47,10 +47,10 @@ function showModal(options = {}) {
     className: `modal-btn ${type === "danger" ? "modal-btn-danger" : "modal-btn-primary"}`,
     textContent: options.confirmText || (type === "info" ? "Close" : "OK"),
   });
-  confirmBtn.onclick = () => {
+  confirmBtn.addEventListener("click", () => {
     closeModal();
     if (options.onConfirm) options.onConfirm();
-  };
+  });
   footerEl.appendChild(confirmBtn);
 
   overlay.classList.add("open");
@@ -147,11 +147,11 @@ function bindModalEvents() {
   const closeBtn = el("global-modal-close");
   const overlay = el("global-modal-overlay");
   
-  if (closeBtn) closeBtn.onclick = closeModal;
+  if (closeBtn) closeBtn.addEventListener("click", closeModal);
   if (overlay) {
-    overlay.onclick = (e) => {
+    overlay.addEventListener("click", (e) => {
       if (e.target === overlay) closeModal();
-    };
+    });
   }
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeModal();

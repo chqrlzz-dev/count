@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PrintBill — Startup Tab",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Efficient printing shop invoice management directly in your new tab.",
   "chrome_url_overrides": {
     "newtab": "index.html"

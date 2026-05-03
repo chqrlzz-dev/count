@@ -77,6 +77,7 @@ window.toggleHistoryExpanded = function(idx) {
 
 function renderHistoryList() {
   const container = el("history-list");
+  if (!container) return;
   const history = readLocalStorage(STORAGE_KEYS.recentInvoices, []);
 
   if (history.length === 0) {
@@ -98,7 +99,7 @@ function renderHistoryList() {
             const sizeStr = f.fileSize ? ` <span class="history-file-size">(${formatSize(f.fileSize)})</span>` : "";
             const paperLabel = { long: "Long", short: "Short", a4: "A4" }[f.paperSize] || "Short";
             const modeLabel = f.colorMode === "color" ? "Color" : "B&W";
-            
+
             return `
       <div class="history-file-row">
         <div class="history-file-info">
@@ -129,7 +130,7 @@ function renderHistoryList() {
       : "";
 
     item.innerHTML = `
-      <div class="history-item-header" onclick="toggleHistoryExpanded(${idx})">
+      <div class="history-item-header">
         <div class="history-item-top">
           <span class="history-item-ref">${entry.ref}</span>
           <span class="history-item-total">${formatPeso(entry.grandTotal)}</span>
@@ -146,20 +147,27 @@ function renderHistoryList() {
         </div>
         ${remarksHtml}
         <div class="history-actions">
-          <button class="btn-history-action${entry.isDone ? " active-done" : ""}" onclick="toggleHistoryStatus(${idx}, 'isDone')">
+          <button class="btn-history-action btn-done${entry.isDone ? " active-done" : ""}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
             Done
           </button>
-          <button class="btn-history-action${entry.isPaid ? " active-paid" : ""}" onclick="toggleHistoryStatus(${idx}, 'isPaid')">
+          <button class="btn-history-action btn-paid${entry.isPaid ? " active-paid" : ""}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             Paid
           </button>
-          <button class="btn-history-action danger" onclick="deleteHistoryItem(${idx})">
+          <button class="btn-history-action danger btn-delete">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
           </button>
         </div>
       </div>
     `;
+
+    // Bind Events
+    item.querySelector(".history-item-header").addEventListener("click", () => toggleHistoryExpanded(idx));
+    item.querySelector(".btn-done").addEventListener("click", (e) => { e.stopPropagation(); toggleHistoryStatus(idx, 'isDone'); });
+    item.querySelector(".btn-paid").addEventListener("click", (e) => { e.stopPropagation(); toggleHistoryStatus(idx, 'isPaid'); });
+    item.querySelector(".btn-delete").addEventListener("click", (e) => { e.stopPropagation(); deleteHistoryItem(idx); });
+
     container.appendChild(item);
   });
 }

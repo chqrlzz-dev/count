@@ -128,7 +128,7 @@ function showRevenueDashboard() {
       </div>
       
       <div class="dashboard-footer-actions">
-        <button class="btn-dashboard-reset" onclick="window.resetCumulativeStats()">
+        <button class="btn-dashboard-reset">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
           Reset Statistics
         </button>
@@ -143,6 +143,12 @@ function showRevenueDashboard() {
     confirmText: "Close",
     modalClass: "modal-lg"
   });
+
+  // Bind Reset Statistics Event (Post-render)
+  const resetBtn = document.querySelector(".btn-dashboard-reset");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => window.resetCumulativeStats());
+  }
 }
 
 function renderReamProgress(label, stats) {
