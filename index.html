@@ -102,17 +102,6 @@
             Add more files
           </div>
 
-          <!-- Progress bar for processing -->
-          <div id="processing-progress-container" class="processing-progress-container" style="display:none">
-            <div class="progress-info">
-              <span id="progress-status-text">Processing files...</span>
-              <span id="progress-percent">0%</span>
-            </div>
-            <div class="progress-track">
-              <div id="progress-bar-fill" class="progress-bar-fill" style="width:0%"></div>
-            </div>
-          </div>
-
           <!-- Hidden file input -->
           <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc" style="display:none" aria-label="Choose files" />
 
@@ -573,6 +562,17 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
       <div class="processing-message" id="processing-message">Processing...</div>
+
+      <!-- Progress bar for processing (now in overlay) -->
+      <div id="processing-progress-container" class="processing-progress-container" style="display:none; margin-top: 20px; border: none; background: var(--bg-input);">
+        <div class="progress-info">
+          <span id="progress-status-text">Processing...</span>
+          <span id="progress-percent">0%</span>
+        </div>
+        <div class="progress-track">
+          <div id="progress-bar-fill" class="progress-bar-fill" style="width:0%"></div>
+        </div>
+      </div>
     </div>
   </div>
 

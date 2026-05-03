@@ -101,10 +101,6 @@ async function processFilesAsync(files) {
   
   const fileArray = Array.from(files);
   const total = fileArray.length;
-  let processed = 0;
-  
-  showProcessingProgress();
-  updateProcessingProgress(0, total, `Processing 0 of ${total} files...`);
   
   // Process in parallel with a small delay between batches to keep UI responsive if needed
   // For now, simple Promise.all is fastest
@@ -114,14 +110,10 @@ async function processFilesAsync(files) {
     } catch (e) {
       console.error(`Failed to process ${file.name}`, e);
       showToast(`Failed to process ${file.name}`, "error");
-    } finally {
-      processed++;
-      updateProcessingProgress(processed, total, `Processing ${processed} of ${total} files...`);
     }
   }));
   
   setTimeout(() => {
-    hideProcessingProgress();
     showToast(`Successfully processed ${total} files`, "success");
   }, 500);
 }

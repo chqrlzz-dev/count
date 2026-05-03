@@ -114,7 +114,9 @@ function hideProcessing() {
 
 function showProcessingProgress() {
   const container = el("processing-progress-container");
+  const spinner = el("processing-spinner");
   if (container) container.style.display = "block";
+  if (spinner) spinner.style.display = "none";
 }
 
 function updateProcessingProgress(current, total, statusText) {
@@ -131,12 +133,14 @@ function updateProcessingProgress(current, total, statusText) {
 
 function hideProcessingProgress() {
   const container = el("processing-progress-container");
+  const spinner = el("processing-spinner");
   if (container) {
     container.style.display = "none";
     // Reset for next time
     const bar = el("progress-bar-fill");
     if (bar) bar.style.width = "0%";
   }
+  if (spinner) spinner.style.display = "block";
 }
 
 function bindModalEvents() {

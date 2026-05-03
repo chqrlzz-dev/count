@@ -274,6 +274,10 @@ function placeOrder() {
     type: "confirm",
     confirmText: "Place Order",
     onConfirm: async () => {
+      showProcessing("Placing order...");
+      showProcessingProgress();
+      updateProcessingProgress(10, 100, "Updating statistics...");
+
       // Update Cumulative Stats
       for (const item of state.fileItems) {
         const totalPages = item.pages * item.copies;
@@ -285,21 +289,25 @@ function placeOrder() {
       state.cumulativeStats.totalOrders += 1;
       
       await writeDb(STORAGE_KEYS.cumulativeStats, state.cumulativeStats);
-
+      
+      updateProcessingProgress(30, 100, "Saving to history...");
       saveInvoiceToRecentHistory();
 
-      showProcessing("Listing items...");
+      updateProcessingProgress(50, 100, "Listing items...");
       
       setTimeout(() => {
+        updateProcessingProgress(70, 100, "Generating Invoice...");
         updateProcessingMessage("Generating Invoice...");
         
         copyInvoiceAsImageAsync().then(() => {
+          updateProcessingProgress(100, 100, "Order Placed!");
           updateProcessingMessage("Order Placed!", true);
           showToast(`✓ Order placed! Collect ${formatPeso(totals.grandTotal)}`, "success");
           setStatus("Order Placed", "copied");
 
           setTimeout(() => {
             hideProcessing();
+            hideProcessingProgress();
             clearAllInvoiceData();
             state.invoiceRef = generateRef();
             state.invoiceDate = formatDate(new Date());
