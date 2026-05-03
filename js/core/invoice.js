@@ -281,18 +281,26 @@ function placeOrder() {
 
       saveInvoiceToRecentHistory();
 
-      copyInvoiceAsImageAsync().then(() => {
-        showToast(`✓ Order placed! Collect ${formatPeso(totals.grandTotal)}`, "success");
-        setStatus("Order Placed", "copied");
+      showProcessing("Listing items...");
+      
+      setTimeout(() => {
+        updateProcessingMessage("Generating Invoice...");
+        
+        copyInvoiceAsImageAsync().then(() => {
+          updateProcessingMessage("Order Placed!", true);
+          showToast(`✓ Order placed! Collect ${formatPeso(totals.grandTotal)}`, "success");
+          setStatus("Order Placed", "copied");
 
-        setTimeout(() => {
-          clearAllInvoiceData();
-          state.invoiceRef = generateRef();
-          state.invoiceDate = formatDate(new Date());
-          updateInvoicePreview();
-          setStatus("Ready");
-        }, 2000);
-      });
+          setTimeout(() => {
+            hideProcessing();
+            clearAllInvoiceData();
+            state.invoiceRef = generateRef();
+            state.invoiceDate = formatDate(new Date());
+            updateInvoicePreview();
+            setStatus("Ready");
+          }, 1500);
+        });
+      }, 800);
     }
   });
 }

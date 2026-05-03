@@ -3,6 +3,7 @@
 @import "tokens.css";
 @import "layout.css";
 @import "components.css";
+@import "transitions.css";
 @import "invoice.css";
 @import "drawer.css";
 @import "dashboard.css";

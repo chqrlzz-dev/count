@@ -63,6 +63,53 @@ function closeModal() {
   document.body.style.overflow = "";
 }
 
+// ─── Processing Overlay ─────────────────────────────────────────────────────
+
+function showProcessing(message = "Processing...") {
+  const overlay = el("processing-overlay");
+  const msgEl = el("processing-message");
+  const spinner = el("processing-spinner");
+  const successIcon = el("processing-success-icon");
+  
+  if (overlay && msgEl) {
+    msgEl.textContent = message;
+    if (spinner) spinner.style.display = "block";
+    if (successIcon) successIcon.style.display = "none";
+    
+    overlay.classList.add("active");
+    overlay.setAttribute("aria-hidden", "false");
+  }
+}
+
+function updateProcessingMessage(message, isSuccess = false) {
+  const msgEl = el("processing-message");
+  const spinner = el("processing-spinner");
+  const successIcon = el("processing-success-icon");
+
+  if (msgEl) {
+    msgEl.style.opacity = "0";
+    msgEl.style.transform = "translateY(5px)";
+    setTimeout(() => {
+      msgEl.textContent = message;
+      msgEl.style.opacity = "1";
+      msgEl.style.transform = "translateY(0)";
+      
+      if (isSuccess) {
+        if (spinner) spinner.style.display = "none";
+        if (successIcon) successIcon.style.display = "flex";
+      }
+    }, 150);
+  }
+}
+
+function hideProcessing() {
+  const overlay = el("processing-overlay");
+  if (overlay) {
+    overlay.classList.remove("active");
+    overlay.setAttribute("aria-hidden", "true");
+  }
+}
+
 function bindModalEvents() {
   const closeBtn = el("global-modal-close");
   const overlay = el("global-modal-overlay");
