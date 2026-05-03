@@ -96,6 +96,36 @@ function estimateDocxPageCount(file) {
   return Math.max(1, Math.ceil(file.size / DOCX_BYTES_PER_PAGE));
 }
 
+async function processFilesAsync(files) {
+  if (!files || files.length === 0) return;
+  
+  const fileArray = Array.from(files);
+  const total = fileArray.length;
+  let processed = 0;
+  
+  showProcessingProgress();
+  updateProcessingProgress(0, total, `Processing 0 of ${total} files...`);
+  
+  // Process in parallel with a small delay between batches to keep UI responsive if needed
+  // For now, simple Promise.all is fastest
+  await Promise.all(fileArray.map(async (file) => {
+    try {
+      await processUploadedFileAsync(file);
+    } catch (e) {
+      console.error(`Failed to process ${file.name}`, e);
+      showToast(`Failed to process ${file.name}`, "error");
+    } finally {
+      processed++;
+      updateProcessingProgress(processed, total, `Processing ${processed} of ${total} files...`);
+    }
+  }));
+  
+  setTimeout(() => {
+    hideProcessingProgress();
+    showToast(`Successfully processed ${total} files`, "success");
+  }, 500);
+}
+
 async function processUploadedFileAsync(file) {
   const ext = file.name.split(".").pop().toLowerCase();
   const isPdf = ext === "pdf";
@@ -128,7 +158,6 @@ async function processUploadedFileAsync(file) {
   showCompactDropZone();
 
   if (isPdf) {
-    setStatus("Analyzing…", "analyzing");
     try {
       const result = await readPdfPageCountAsync(file);
       item.paperSize = result.detectedSize;
@@ -136,19 +165,14 @@ async function processUploadedFileAsync(file) {
       mutateItemPages(item.id, result.numPages, true);
     } catch {
       mutateItemNeedsPageEntry(item.id);
-    } finally {
-      setStatus("Ready");
     }
   } else if (isDocx) {
-    setStatus("Analyzing…", "analyzing");
     try {
       const pages = await readDocxPageCountAsync(file);
       mutateItemPages(item.id, pages, true);
     } catch {
       const estimated = estimateDocxPageCount(file);
       mutateItemPages(item.id, estimated, false);
-    } finally {
-      setStatus("Ready");
     }
   } else {
     mutateItemNeedsPageEntry(item.id);

@@ -2,30 +2,52 @@
  * Settings & Persistence
  */
 
-function persistSettingsToStorage() {
-  writeLocalStorage(STORAGE_KEYS.settings, {
-    taxRate: state.settings.taxRate,
-    isTaxEnabled: state.settings.isTaxEnabled,
-    isVatVisibleOnInvoice: state.settings.isVatVisibleOnInvoice,
-    shouldRoundUp: state.settings.shouldRoundUp,
-    defaultCopies: state.settings.defaultCopies,
-    isKMode: state.settings.isKMode,
-    discountTiers: state.discountTiers,
-  });
-  writeLocalStorage(STORAGE_KEYS.pricing, state.pricing);
-  writeLocalStorage(STORAGE_KEYS.pricingStandard, state.pricingStandard);
-  writeLocalStorage(STORAGE_KEYS.pricingKMode, state.pricingKMode);
-  writeLocalStorage(STORAGE_KEYS.revenueConfig, state.revenueConfig);
-  writeLocalStorage(STORAGE_KEYS.cumulativeStats, state.cumulativeStats);
-  writeLocalStorage(STORAGE_KEYS.shopInfo, state.shopInfo);
-  writeLocalStorage(STORAGE_KEYS.fileItems, state.fileItems);
+async function persistSettingsToStorage() {
+  await Promise.all([
+    writeDb(STORAGE_KEYS.settings, {
+      taxRate: state.settings.taxRate,
+      isTaxEnabled: state.settings.isTaxEnabled,
+      isVatVisibleOnInvoice: state.settings.isVatVisibleOnInvoice,
+      shouldRoundUp: state.settings.shouldRoundUp,
+      defaultCopies: state.settings.defaultCopies,
+      isKMode: state.settings.isKMode,
+      discountTiers: state.discountTiers,
+    }),
+    writeDb(STORAGE_KEYS.pricing, state.pricing),
+    writeDb(STORAGE_KEYS.pricingStandard, state.pricingStandard),
+    writeDb(STORAGE_KEYS.pricingKMode, state.pricingKMode),
+    writeDb(STORAGE_KEYS.revenueConfig, state.revenueConfig),
+    writeDb(STORAGE_KEYS.cumulativeStats, state.cumulativeStats),
+    writeDb(STORAGE_KEYS.shopInfo, state.shopInfo),
+    writeDb(STORAGE_KEYS.fileItems, state.fileItems),
+  ]);
 }
 
-function loadSettingsFromStorage() {
-  const shopInfo = readLocalStorage(STORAGE_KEYS.shopInfo);
+async function loadSettingsFromStorage() {
+  const [
+    shopInfo,
+    settings,
+    pricing,
+    pricingStandard,
+    pricingKMode,
+    revConfig,
+    cumStats,
+    savedItems,
+    theme
+  ] = await Promise.all([
+    readDb(STORAGE_KEYS.shopInfo),
+    readDb(STORAGE_KEYS.settings),
+    readDb(STORAGE_KEYS.pricing),
+    readDb(STORAGE_KEYS.pricingStandard),
+    readDb(STORAGE_KEYS.pricingKMode),
+    readDb(STORAGE_KEYS.revenueConfig),
+    readDb(STORAGE_KEYS.cumulativeStats),
+    readDb(STORAGE_KEYS.fileItems),
+    readDb(STORAGE_KEYS.theme, "dark")
+  ]);
+
   if (shopInfo) Object.assign(state.shopInfo, shopInfo);
 
-  const settings = readLocalStorage(STORAGE_KEYS.settings);
   if (settings) {
     state.settings.taxRate = settings.taxRate ?? TAX_RATE_DEFAULT;
     state.settings.isTaxEnabled = settings.isTaxEnabled ?? true;
@@ -36,22 +58,12 @@ function loadSettingsFromStorage() {
     if (settings.discountTiers) state.discountTiers = settings.discountTiers;
   }
 
-  const pricing = readLocalStorage(STORAGE_KEYS.pricing);
   if (pricing) Object.assign(state.pricing, pricing);
-
-  const pricingStandard = readLocalStorage(STORAGE_KEYS.pricingStandard);
   if (pricingStandard) Object.assign(state.pricingStandard, pricingStandard);
-
-  const pricingKMode = readLocalStorage(STORAGE_KEYS.pricingKMode);
   if (pricingKMode) Object.assign(state.pricingKMode, pricingKMode);
-
-  const revConfig = readLocalStorage(STORAGE_KEYS.revenueConfig);
   if (revConfig) Object.assign(state.revenueConfig, revConfig);
-
-  const cumStats = readLocalStorage(STORAGE_KEYS.cumulativeStats);
   if (cumStats) Object.assign(state.cumulativeStats, cumStats);
 
-  const savedItems = readLocalStorage(STORAGE_KEYS.fileItems);
   if (savedItems && Array.isArray(savedItems)) {
     state.fileItems = savedItems;
     if (state.fileItems.length > 0) {
@@ -64,7 +76,6 @@ function loadSettingsFromStorage() {
     state.settings.isKMode ? state.pricingKMode : state.pricingStandard
   ));
 
-  const theme = readLocalStorage(STORAGE_KEYS.theme, "dark");
   applyTheme(theme);
 }
 
@@ -78,11 +89,11 @@ function applyTheme(theme) {
   }
 }
 
-function toggleTheme() {
+async function toggleTheme() {
   const current = document.documentElement.getAttribute("data-theme");
   const next = current === "dark" ? "light" : "dark";
   applyTheme(next);
-  writeLocalStorage(STORAGE_KEYS.theme, next);
+  await writeDb(STORAGE_KEYS.theme, next);
 }
 
 function toggleKMode(enabled) {
@@ -196,12 +207,8 @@ function resetSettingsToDefaults() {
     body: "Are you sure you want to reset all settings to their defaults? This cannot be undone.",
     type: "danger",
     confirmText: "Reset Defaults",
-    onConfirm: () => {
-      localStorage.removeItem(STORAGE_KEYS.settings);
-      localStorage.removeItem(STORAGE_KEYS.shopInfo);
-      localStorage.removeItem(STORAGE_KEYS.pricing);
-      localStorage.removeItem(STORAGE_KEYS.pricingStandard);
-      localStorage.removeItem(STORAGE_KEYS.pricingKMode);
+    onConfirm: async () => {
+      await window.appDb.clear();
       state.settings = {
         taxRate: TAX_RATE_DEFAULT,
         isTaxEnabled: true,

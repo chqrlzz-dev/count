@@ -76,16 +76,7 @@ async function handleFiles(files) {
     return;
   }
   
-  setStatus(`Processing ${supported.length} file(s)...`, "analyzing");
-  for (const file of supported) {
-    try {
-      await processUploadedFileAsync(file);
-    } catch (err) {
-      console.error("Failed to process file:", file.name, err);
-      showToast(`Error processing ${file.name}`, "error");
-    }
-  }
-  setStatus("Ready");
+  await processFilesAsync(supported);
 }
 
 function bindFileTableEvents() {

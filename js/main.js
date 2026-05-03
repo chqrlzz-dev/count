@@ -2,17 +2,14 @@
  * Main Entry Point
  */
 
-function init() {
+async function init() {
   // Generate initial invoice metadata if needed
   if (!state.invoiceRef) state.invoiceRef = generateRef();
   if (!state.invoiceDate) state.invoiceDate = formatDate(new Date());
 
-  // Load persisted theme
-  const savedTheme = readLocalStorage(STORAGE_KEYS.theme, "dark");
-  applyTheme(savedTheme);
-
-  // Load settings
-  loadSettingsFromStorage();
+  // Load settings (now async via IndexedDB)
+  await loadSettingsFromStorage();
+  
   applyLoadedSettingsToUI();
   applyPricingMatrixToUI();
 
@@ -45,4 +42,6 @@ function init() {
   setStatus("Ready");
 }
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", () => {
+  init().catch(err => console.error("Initialization failed:", err));
+});

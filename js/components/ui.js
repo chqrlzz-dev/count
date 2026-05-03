@@ -110,6 +110,35 @@ function hideProcessing() {
   }
 }
 
+// ─── Progress Bar ───────────────────────────────────────────────────────────
+
+function showProcessingProgress() {
+  const container = el("processing-progress-container");
+  if (container) container.style.display = "block";
+}
+
+function updateProcessingProgress(current, total, statusText) {
+  const bar = el("progress-bar-fill");
+  const percentText = el("progress-percent");
+  const statusEl = el("progress-status-text");
+  
+  const percent = Math.round((current / total) * 100);
+  
+  if (bar) bar.style.width = `${percent}%`;
+  if (percentText) percentText.textContent = `${percent}%`;
+  if (statusEl && statusText) statusEl.textContent = statusText;
+}
+
+function hideProcessingProgress() {
+  const container = el("processing-progress-container");
+  if (container) {
+    container.style.display = "none";
+    // Reset for next time
+    const bar = el("progress-bar-fill");
+    if (bar) bar.style.width = "0%";
+  }
+}
+
 function bindModalEvents() {
   const closeBtn = el("global-modal-close");
   const overlay = el("global-modal-overlay");

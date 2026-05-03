@@ -107,14 +107,6 @@ function updateInvoiceTotals() {
   } else {
     taxRow.style.display = "none";
   }
-
-  const roundingRow = el("inv-rounding-row");
-  if (totals.roundingAmt > 0) {
-    roundingRow.style.display = "flex";
-    el("inv-rounding-val").textContent = formatPeso(totals.roundingAmt);
-  } else {
-    roundingRow.style.display = "none";
-  }
 }
 
 function updateInvoiceRemarks() {
@@ -167,7 +159,7 @@ async function captureInvoiceCanvas() {
     );
 
     const canvas = await html2canvas(container, {
-      scale: COPY_IMAGE_SCALE + 1,
+      scale: COPY_IMAGE_SCALE,
       useCORS: true,
       backgroundColor: "#ffffff",
       logging: false,
@@ -275,7 +267,7 @@ function placeOrder() {
     body: collectMsg,
     type: "confirm",
     confirmText: "Place Order",
-    onConfirm: () => {
+    onConfirm: async () => {
       // Update Cumulative Stats
       for (const item of state.fileItems) {
         const totalPages = item.pages * item.copies;
@@ -285,7 +277,8 @@ function placeOrder() {
       }
       state.cumulativeStats.totalRevenue += totals.grandTotal;
       state.cumulativeStats.totalOrders += 1;
-      writeLocalStorage(STORAGE_KEYS.cumulativeStats, state.cumulativeStats);
+      
+      await writeDb(STORAGE_KEYS.cumulativeStats, state.cumulativeStats);
 
       saveInvoiceToRecentHistory();
 

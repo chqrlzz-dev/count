@@ -102,6 +102,17 @@
             Add more files
           </div>
 
+          <!-- Progress bar for processing -->
+          <div id="processing-progress-container" class="processing-progress-container" style="display:none">
+            <div class="progress-info">
+              <span id="progress-status-text">Processing files...</span>
+              <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-track">
+              <div id="progress-bar-fill" class="progress-bar-fill" style="width:0%"></div>
+            </div>
+          </div>
+
           <!-- Hidden file input -->
           <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc" style="display:none" aria-label="Choose files" />
 
@@ -259,10 +270,6 @@
               <div class="totals-row" id="inv-tax-row" style="display:none">
                 <span class="lbl" id="inv-tax-label">Tax / VAT</span>
                 <span class="val" id="inv-tax-val"></span>
-              </div>
-              <div class="totals-row" id="inv-rounding-row" style="display:none">
-                <span class="lbl">Rounding Adjustment</span>
-                <span class="val" id="inv-rounding-val"></span>
               </div>
               <div class="totals-row grand">
                 <span class="lbl">Grand Total</span>
@@ -549,6 +556,7 @@
   </div>
 
 <!-- App Logic -->
+<script src="js/db.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/config.js"></script>
 <script src="js/state.js"></script>

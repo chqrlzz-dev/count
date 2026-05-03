@@ -63,6 +63,23 @@ function formatSize(bytes) {
   return (bytes / 1048576).toFixed(1) + " MB";
 }
 
+async function readDb(key, fallback = null) {
+  try {
+    const val = await window.appDb.get(key);
+    return val !== undefined ? val : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+async function writeDb(key, value) {
+  try {
+    await window.appDb.set(key, value);
+  } catch (e) {
+    console.warn("DB write failed", e);
+  }
+}
+
 function readLocalStorage(key, fallback = null) {
   try {
     const raw = localStorage.getItem(key);
