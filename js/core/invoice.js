@@ -10,10 +10,16 @@ function updateInvoicePreview() {
 
   // Set QR Code
   const qrImg = el("inv-qr-image");
-  if (qrImg) {
-    qrImg.src = GCASH_QR_B64;
-    qrImg.style.width = `${INVOICE_QR_SIZE_PX}px`;
-    qrImg.style.height = `${INVOICE_QR_SIZE_PX}px`;
+  const qrContainer = el("inv-qr-container");
+  if (qrImg && qrContainer) {
+    if (state.qrCode) {
+      qrImg.src = state.qrCode;
+      qrImg.style.width = `${INVOICE_QR_SIZE_PX}px`;
+      qrImg.style.height = `${INVOICE_QR_SIZE_PX}px`;
+      qrContainer.style.display = "flex";
+    } else {
+      qrContainer.style.display = "none";
+    }
   }
 
   // ─── Dynamic Portrait Adjustment ───

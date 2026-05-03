@@ -303,6 +303,57 @@
   margin-bottom: 12px;
 }
 
+/* QR Code Upload */
+.qr-upload-container {
+  display: flex;
+  gap: 16px;
+  background: var(--bg-hover);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.qr-preview-box {
+  width: 100px;
+  height: 100px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.qr-preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.qr-preview-box img:not([src]), .qr-preview-box img[src=""] {
+  display: none;
+}
+
+.qr-preview-box::before {
+  content: "No QR";
+  font-size: 10px;
+  color: var(--text-3);
+}
+
+.qr-preview-box:has(img[src]:not([src=""]))::before {
+  display: none;
+}
+
+.qr-upload-actions {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .drawer-footer {
   padding: 16px 20px;
   border-top: 1px solid var(--border);

@@ -20,6 +20,7 @@ async function persistSettingsToStorage() {
     writeDb(STORAGE_KEYS.cumulativeStats, state.cumulativeStats),
     writeDb(STORAGE_KEYS.shopInfo, state.shopInfo),
     writeDb(STORAGE_KEYS.fileItems, state.fileItems),
+    writeDb(STORAGE_KEYS.qrCode, state.qrCode),
   ]);
 }
 
@@ -33,7 +34,8 @@ async function loadSettingsFromStorage() {
     revConfig,
     cumStats,
     savedItems,
-    theme
+    theme,
+    qrCode
   ] = await Promise.all([
     readDb(STORAGE_KEYS.shopInfo),
     readDb(STORAGE_KEYS.settings),
@@ -43,7 +45,8 @@ async function loadSettingsFromStorage() {
     readDb(STORAGE_KEYS.revenueConfig),
     readDb(STORAGE_KEYS.cumulativeStats),
     readDb(STORAGE_KEYS.fileItems),
-    readDb(STORAGE_KEYS.theme, "dark")
+    readDb(STORAGE_KEYS.theme, "dark"),
+    readDb(STORAGE_KEYS.qrCode)
   ]);
 
   if (shopInfo) Object.assign(state.shopInfo, shopInfo);
@@ -63,6 +66,7 @@ async function loadSettingsFromStorage() {
   if (pricingKMode) Object.assign(state.pricingKMode, pricingKMode);
   if (revConfig) Object.assign(state.revenueConfig, revConfig);
   if (cumStats) Object.assign(state.cumulativeStats, cumStats);
+  if (qrCode) state.qrCode = qrCode;
 
   if (savedItems && Array.isArray(savedItems)) {
     state.fileItems = savedItems;
@@ -77,6 +81,42 @@ async function loadSettingsFromStorage() {
   ));
 
   applyTheme(theme);
+}
+
+function handleQrUpload(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      // 1:1 Square Cropping via Canvas
+      const canvas = document.createElement("canvas");
+      const size = Math.min(img.width, img.height);
+      canvas.width = 400; // Standardize stored size
+      canvas.height = 400;
+      const ctx = canvas.getContext("2d");
+
+      const offsetX = (img.width - size) / 2;
+      const offsetY = (img.height - size) / 2;
+
+      ctx.drawImage(img, offsetX, offsetY, size, size, 0, 0, 400, 400);
+      const b64 = canvas.toDataURL("image/png");
+      
+      state.qrCode = b64;
+      if (el("qr-preview-img")) el("qr-preview-img").src = b64;
+      updateInvoicePreview();
+      showToast("QR Code updated", "success");
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearQrCode() {
+  state.qrCode = "";
+  if (el("qr-preview-img")) el("qr-preview-img").src = "";
+  updateInvoicePreview();
+  showToast("QR Code cleared", "info");
 }
 
 function applyTheme(theme) {
@@ -258,6 +298,8 @@ function loadSettingsIntoDrawer() {
   el("ink-pages-yield").value = state.revenueConfig.inkPagesYield;
   el("elec-kwh-rate").value = state.revenueConfig.elecKwhRate;
   el("printer-wattage").value = state.revenueConfig.printerWattage;
+
+  if (el("qr-preview-img")) el("qr-preview-img").src = state.qrCode || "";
 
   applyPricingMatrixToUI();
   renderDiscountTiers();

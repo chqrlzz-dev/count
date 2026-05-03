@@ -40,4 +40,5 @@ const state = {
   },
   invoiceRef: "", // Will be generated in main.js
   invoiceDate: "", // Will be set in main.js
+  qrCode: GCASH_QR_B64,
 };

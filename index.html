@@ -292,7 +292,7 @@
             <div class="inv-info-text">
               <!-- Text removed as requested -->
             </div>
-            <div class="inv-qr-container" id="inv-qr-container">
+            <div class="inv-qr-container" id="inv-qr-container" style="display:none">
               <img id="inv-qr-image" class="inv-qr-image" src="" alt="Payment QR Code" />
               <div class="inv-qr-label">SCAN TO PAY</div>
             </div>
@@ -477,6 +477,27 @@
         <label class="field-label" for="printer-wattage">Printer Wattage (Watts)</label>
         <input type="number" id="printer-wattage" class="field-input" value="50" min="0" step="5" />
       </div>
+    </div>
+
+    <!-- Payment QR Code -->
+    <div>
+      <div class="drawer-section-title">Payment QR Code</div>
+      <div style="font-size:11px;color:var(--text-2);margin-bottom:10px">Used for Gcash/Maya scanning</div>
+      <div class="qr-upload-container">
+        <div class="qr-preview-box" id="qr-preview-box">
+          <img id="qr-preview-img" src="" alt="QR Preview" />
+        </div>
+        <div class="qr-upload-actions">
+          <button class="btn-secondary" id="btn-qr-upload" style="width:100%">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload QR
+          </button>
+          <button class="btn-ghost danger-hover" id="btn-qr-clear" style="width:100%;margin-top:8px">
+            Clear QR
+          </button>
+        </div>
+      </div>
+      <input type="file" id="qr-input" accept="image/*" style="display:none" />
     </div>
 
     <!-- Volume Discounts -->

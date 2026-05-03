@@ -265,6 +265,16 @@ function bindSettingsEvents() {
   el("tab-settings")?.addEventListener("click", () => switchDrawerView("settings"));
 }
 
+function bindQrEvents() {
+  el("btn-qr-upload")?.addEventListener("click", () => el("qr-input").click());
+  el("btn-qr-clear")?.addEventListener("click", clearQrCode);
+  el("qr-input")?.addEventListener("change", (e) => {
+    if (e.target.files && e.target.files[0]) {
+      handleQrUpload(e.target.files[0]);
+    }
+  });
+}
+
 function bindNumericInputEvents() {
   document.addEventListener("keydown", (e) => {
     if (e.target.tagName === "INPUT" && e.target.type === "number") {
@@ -331,6 +341,7 @@ function bindAllEvents() {
   bindDiscountTierEvents();
   bindExportEvents();
   bindSettingsEvents();
+  bindQrEvents();
   bindNumericInputEvents();
   bindHeaderEvents();
   bindMobilePreviewEvents();
