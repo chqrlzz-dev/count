@@ -56,10 +56,14 @@ function computeGrandTotal() {
   const taxAmt = state.settings.isTaxEnabled
     ? discountedPrice * (state.settings.taxRate / 100)
     : 0;
-  let grandTotal = discountedPrice + taxAmt;
+  
+  const rawTotal = discountedPrice + taxAmt;
+  let grandTotal = rawTotal;
+  let roundingAmt = 0;
 
-  if (state.settings.shouldRoundUp && grandTotal % 1 >= 0.25) {
+  if (state.settings.shouldRoundUp && grandTotal % 1 > 0) {
     grandTotal = Math.ceil(grandTotal);
+    roundingAmt = grandTotal - rawTotal;
   }
 
   return {
@@ -67,6 +71,8 @@ function computeGrandTotal() {
     discountAmt,
     discountedPrice,
     taxAmt,
+    rawTotal,
+    roundingAmt,
     grandTotal,
     activeTier,
   };

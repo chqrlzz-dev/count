@@ -107,6 +107,14 @@ function updateInvoiceTotals() {
   } else {
     taxRow.style.display = "none";
   }
+
+  const roundingRow = el("inv-rounding-row");
+  if (totals.roundingAmt > 0) {
+    roundingRow.style.display = "flex";
+    el("inv-rounding-val").textContent = formatPeso(totals.roundingAmt);
+  } else {
+    roundingRow.style.display = "none";
+  }
 }
 
 function updateInvoiceRemarks() {
