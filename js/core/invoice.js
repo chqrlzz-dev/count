@@ -58,12 +58,19 @@ function updateInvoiceLineItems() {
 
     const sizeLabel =
       { long: "Long", short: "Short", a4: "A4" }[item.paperSize] || "Short";
-    const modeLabel = item.colorMode === "color" ? "Color" : "B&W";
+    const modeMap = {
+      bw: { label: "B&W", color: "var(--text-3)" },
+      color_small: { label: "Small Color", color: "var(--blue)" },
+      color_partial: { label: "Partial Color", color: "var(--amber)" },
+      color_full: { label: "Full Color", color: "var(--accent)" },
+      color: { label: "Color", color: "var(--blue)" }, // fallback
+    };
+    const modeInfo = modeMap[item.colorMode] || modeMap.bw;
 
     tr.innerHTML = `
       <td class="inv-item-name">${truncateText(item.fileName, 32)}${item.isManual ? ' <span style="font-size:9px;color:#a09a94">[manual]</span>' : ""}</td>
       <td class="inv-size">${sizeLabel}</td>
-      <td class="inv-mode">${modeLabel}</td>
+      <td class="inv-mode"><span style="color:${modeInfo.color};font-weight:600">${modeInfo.label}</span></td>
       <td class="inv-num">${item.pages}</td>
       <td class="inv-num">${item.copies}</td>
       <td class="inv-price">${formatPeso(item.unitPrice)}</td>

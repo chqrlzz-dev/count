@@ -72,13 +72,15 @@
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 20px;
+  border-top: 4px solid var(--accent);
+  padding-top: 20px;
 }
 
 .inv-title {
   font-family: 'Syne', sans-serif;
   font-size: 28px;
   font-weight: 800;
-  color: var(--text-1);
+  color: var(--accent);
   letter-spacing: -0.03em;
   line-height: 1;
   margin-bottom: 4px;
