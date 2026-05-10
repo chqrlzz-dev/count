@@ -156,8 +156,8 @@ function renderHistoryList() {
       <div class="history-item-header">
         <div class="history-item-top">
           <div style="display:flex;flex-direction:column">
-            <span class="history-item-ref">${entry.ref}</span>
-            <span class="history-item-name" style="font-size:10px;color:var(--text-2);font-weight:600">${entry.customerName}</span>
+            <span class="history-item-name" style="font-size:16px;color:var(--accent);font-weight:700;line-height:1.2">${entry.customerName}</span>
+            <span class="history-item-ref" style="font-size:10px;color:var(--text-3);font-family:var(--font-mono)">${entry.ref}</span>
           </div>
           <span class="history-item-total">${formatPeso(entry.grandTotal)}</span>
         </div>

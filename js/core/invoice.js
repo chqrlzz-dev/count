@@ -280,62 +280,75 @@ function placeOrder() {
     type: "confirm",
     confirmText: "Place Order",
     onConfirm: async () => {
-      const nameInput = el("customer-name-input");
-      state.customerName = nameInput ? nameInput.value.trim() : "Walk-in";
-      
-      showProcessing("Placing order...");
-      showProcessingProgress();
-      updateProcessingProgress(10, 100, "Updating statistics...");
-
-      // Update Cumulative Stats
-      for (const item of state.fileItems) {
-        const totalPages = item.pages * item.copies;
-        if (item.paperSize === "long") state.cumulativeStats.pagesLong += totalPages;
-        else if (item.paperSize === "a4") state.cumulativeStats.pagesA4 += totalPages;
-        else state.cumulativeStats.pagesShort += totalPages;
-      }
-      state.cumulativeStats.totalRevenue += totals.grandTotal;
-      state.cumulativeStats.totalOrders += 1;
-      
-      await writeDb(STORAGE_KEYS.cumulativeStats, state.cumulativeStats);
-      
-      updateProcessingProgress(30, 100, "Saving to history...");
-      saveInvoiceToRecentHistory();
-
-      updateProcessingProgress(40, 100, "Syncing to Cloud...");
-      await sendToDiscordWebhookAsync(state.customerName, state.invoiceRef, totals);
-
-      updateProcessingProgress(60, 100, "Listing items...");
-      
-      setTimeout(() => {
-        updateProcessingProgress(80, 100, "Generating Invoice...");
-        updateProcessingMessage("Generating Invoice...");
-        
-        copyInvoiceAsImageAsync().then(() => {
-          updateProcessingProgress(100, 100, "Order Placed!");
-          updateProcessingMessage("Order Placed!", true);
-          showToast(`✓ Order placed! Collect ${formatPeso(totals.grandTotal)}`, "success");
-          setStatus("Order Placed", "copied");
-
-          setTimeout(() => {
-            hideProcessing();
-            hideProcessingProgress();
-            clearAllInvoiceData();
-            state.invoiceRef = generateRef();
-            state.invoiceDate = formatDate(new Date());
-            state.customerName = "";
-            updateInvoicePreview();
-            setStatus("Ready");
-          }, 1500);
-        });
-      }, 800);
+      await executeOrderPlacement();
     }
   });
 
-  // Auto-focus the name input
+  async function executeOrderPlacement() {
+    const nameInput = el("customer-name-input");
+    state.customerName = nameInput ? nameInput.value.trim() : "Walk-in";
+    
+    closeModal(); // Close the name modal
+    showProcessing("Placing order...");
+    showProcessingProgress();
+    updateProcessingProgress(10, 100, "Updating statistics...");
+
+    // Update Cumulative Stats
+    for (const item of state.fileItems) {
+      const totalPages = item.pages * item.copies;
+      if (item.paperSize === "long") state.cumulativeStats.pagesLong += totalPages;
+      else if (item.paperSize === "a4") state.cumulativeStats.pagesA4 += totalPages;
+      else state.cumulativeStats.pagesShort += totalPages;
+    }
+    state.cumulativeStats.totalRevenue += totals.grandTotal;
+    state.cumulativeStats.totalOrders += 1;
+    
+    await writeDb(STORAGE_KEYS.cumulativeStats, state.cumulativeStats);
+    
+    updateProcessingProgress(30, 100, "Saving to history...");
+    saveInvoiceToRecentHistory();
+
+    updateProcessingProgress(40, 100, "Syncing to Cloud...");
+    await sendToDiscordWebhookAsync(state.customerName, state.invoiceRef, totals);
+
+    updateProcessingProgress(60, 100, "Listing items...");
+    
+    setTimeout(() => {
+      updateProcessingProgress(80, 100, "Generating Invoice...");
+      updateProcessingMessage("Generating Invoice...");
+      
+      copyInvoiceAsImageAsync().then(() => {
+        updateProcessingProgress(100, 100, "Order Placed!");
+        updateProcessingMessage("Order Placed!", true);
+        showToast(`✓ Order placed! Collect ${formatPeso(totals.grandTotal)}`, "success");
+        setStatus("Order Placed", "copied");
+
+        setTimeout(() => {
+          hideProcessing();
+          hideProcessingProgress();
+          clearAllInvoiceData();
+          state.invoiceRef = generateRef();
+          state.invoiceDate = formatDate(new Date());
+          state.customerName = "";
+          updateInvoicePreview();
+          setStatus("Ready");
+        }, 1500);
+      });
+    }, 800);
+  }
+
+  // Auto-focus the name input and bind Enter key
   setTimeout(() => {
     const input = el("customer-name-input");
-    if (input) input.focus();
+    if (input) {
+      input.focus();
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          executeOrderPlacement();
+        }
+      });
+    }
   }, 100);
 }
 
