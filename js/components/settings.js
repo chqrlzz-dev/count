@@ -11,6 +11,7 @@ async function persistSettingsToStorage() {
       shouldRoundUp: state.settings.shouldRoundUp,
       defaultCopies: state.settings.defaultCopies,
       isKMode: state.settings.isKMode,
+      discordWebhookUrl: state.settings.discordWebhookUrl,
       discountTiers: state.discountTiers,
     }),
     writeDb(STORAGE_KEYS.pricing, state.pricing),
@@ -58,6 +59,7 @@ async function loadSettingsFromStorage() {
     state.settings.shouldRoundUp = settings.shouldRoundUp ?? false;
     state.settings.defaultCopies = settings.defaultCopies ?? DEFAULT_COPIES;
     state.settings.isKMode = settings.isKMode ?? false;
+    state.settings.discordWebhookUrl = settings.discordWebhookUrl ?? "";
     if (settings.discountTiers) state.discountTiers = settings.discountTiers;
   }
 
@@ -156,12 +158,12 @@ function toggleKMode(enabled) {
 }
 
 function applyPricingMatrixToUI() {
-  if (el("price-bw-long")) el("price-bw-long").value = state.pricing.bw.long;
-  if (el("price-bw-short")) el("price-bw-short").value = state.pricing.bw.short;
-  if (el("price-bw-a4")) el("price-bw-a4").value = state.pricing.bw.a4;
-  if (el("price-color-long")) el("price-color-long").value = state.pricing.color.long;
-  if (el("price-color-short")) el("price-color-short").value = state.pricing.color.short;
-  if (el("price-color-a4")) el("price-color-a4").value = state.pricing.color.a4;
+  const modes = ["bw", "color_small", "color_partial", "color_full"];
+  for (const mode of modes) {
+    if (el(`price-${mode}-long`)) el(`price-${mode}-long`).value = state.pricing[mode]?.long || 0;
+    if (el(`price-${mode}-short`)) el(`price-${mode}-short`).value = state.pricing[mode]?.short || 0;
+    if (el(`price-${mode}-a4`)) el(`price-${mode}-a4`).value = state.pricing[mode]?.a4 || 0;
+  }
 }
 
 function syncPricingMatrixToState() {
@@ -299,6 +301,8 @@ function loadSettingsIntoDrawer() {
   el("elec-kwh-rate").value = state.revenueConfig.elecKwhRate;
   el("printer-wattage").value = state.revenueConfig.printerWattage;
 
+  if (el("discord-webhook")) el("discord-webhook").value = state.settings.discordWebhookUrl || "";
+
   if (el("qr-preview-img")) el("qr-preview-img").src = state.qrCode || "";
 
   applyPricingMatrixToUI();
@@ -319,6 +323,7 @@ function saveSettingsFromDrawer() {
   state.settings.isTaxEnabled = el("tax-enabled").checked;
   state.settings.shouldRoundUp = el("round-up").checked;
   state.settings.isVatVisibleOnInvoice = el("vat-show-invoice").checked;
+  state.settings.discordWebhookUrl = el("discord-webhook") ? el("discord-webhook").value.trim() : "";
 
   state.revenueConfig = {
     sheetsPerReam: parseInt(el("sheets-per-ream").value) || 500,

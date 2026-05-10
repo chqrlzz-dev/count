@@ -7,6 +7,7 @@ function saveInvoiceToRecentHistory() {
   const snapshot = {
     ref: state.invoiceRef,
     date: state.invoiceDate,
+    customerName: state.customerName || "Walk-in",
     grandTotal: totals.grandTotal,
     itemCount: state.fileItems.length,
     fileItems: state.fileItems.map((i) => ({
@@ -63,10 +64,32 @@ window.toggleHistoryStatus = function(idx, field) {
   const history = readLocalStorage(STORAGE_KEYS.recentInvoices, []);
   if (history[idx]) {
     history[idx][field] = !history[idx][field];
-    writeLocalStorage(STORAGE_KEYS.recentInvoices, history);
-    renderHistoryList();
-    // Keep it expanded after toggle
-    el(`history-item-${idx}`).classList.add("expanded");
+    
+    // If both are done/paid, ask to remove to declutter
+    if (history[idx].isDone && history[idx].isPaid) {
+      writeLocalStorage(STORAGE_KEYS.recentInvoices, history);
+      renderHistoryList();
+      
+      showModal({
+        title: "Order Completed",
+        body: "This order is now marked as Done and Paid. Would you like to remove it from history to declutter?",
+        type: "confirm",
+        confirmText: "Remove from History",
+        cancelText: "Keep in History",
+        onConfirm: () => {
+          const updatedHistory = readLocalStorage(STORAGE_KEYS.recentInvoices, []);
+          updatedHistory.splice(idx, 1);
+          writeLocalStorage(STORAGE_KEYS.recentInvoices, updatedHistory);
+          renderHistoryList();
+          showToast("Order cleared from history", "info");
+        }
+      });
+    } else {
+      writeLocalStorage(STORAGE_KEYS.recentInvoices, history);
+      renderHistoryList();
+      // Keep it expanded after toggle
+      el(`history-item-${idx}`).classList.add("expanded");
+    }
   }
 }
 
@@ -132,7 +155,10 @@ function renderHistoryList() {
     item.innerHTML = `
       <div class="history-item-header">
         <div class="history-item-top">
-          <span class="history-item-ref">${entry.ref}</span>
+          <div style="display:flex;flex-direction:column">
+            <span class="history-item-ref">${entry.ref}</span>
+            <span class="history-item-name" style="font-size:10px;color:var(--text-2);font-weight:600">${entry.customerName}</span>
+          </div>
           <span class="history-item-total">${formatPeso(entry.grandTotal)}</span>
         </div>
         <div class="history-item-meta">

@@ -15,12 +15,16 @@ const DISCOUNT_TIERS_DEFAULT = [
 
 const PRICING_DEFAULTS = {
   bw: { long: 3.5, short: 2.5, a4: 2.75 },
-  color: { long: 4.75, short: 2.5, a4: 3.75 },
+  color_small: { long: 4.75, short: 2.5, a4: 3.75 },
+  color_partial: { long: 7.0, short: 5.0, a4: 6.0 },
+  color_full: { long: 10.0, short: 8.0, a4: 9.0 },
 };
 
 const KAKILALA_PRICING_DEFAULTS = {
   bw: { long: 2.25, short: 2.0, a4: 2.0 },
-  color: { long: 4.25, short: 3.25, a4: 3.5 },
+  color_small: { long: 4.25, short: 3.25, a4: 3.5 },
+  color_partial: { long: 6.0, short: 4.0, a4: 5.0 },
+  color_full: { long: 9.0, short: 7.0, a4: 8.0 },
 };
 
 const STORAGE_KEYS = {

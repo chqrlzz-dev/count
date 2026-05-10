@@ -4,22 +4,32 @@
 function getPriceForItem(colorMode, paperSize) {
   const mode = (colorMode || "bw").toLowerCase();
   const size = (paperSize || "short").toLowerCase();
-  return (state.pricing[mode] && state.pricing[mode][size]) || 3.0;
+  
+  if (state.pricing[mode] && state.pricing[mode][size]) {
+    return state.pricing[mode][size];
+  }
+  
+  // Fallback for legacy "color" key
+  if (mode === "color" && state.pricing.color_small) {
+    return state.pricing.color_small[size] || 3.0;
+  }
+
+  return 3.0;
 }
 
 function getPricingMatrixValues() {
-  return {
-    bw: {
-      long: parseFloat(el("price-bw-long").value) || 3.5,
-      short: parseFloat(el("price-bw-short").value) || 2.5,
-      a4: parseFloat(el("price-bw-a4").value) || 2.75,
-    },
-    color: {
-      long: parseFloat(el("price-color-long").value) || 4.75,
-      short: parseFloat(el("price-color-short").value) || 2.5,
-      a4: parseFloat(el("price-color-a4").value) || 3.75,
-    },
-  };
+  const modes = ["bw", "color_small", "color_partial", "color_full"];
+  const matrix = {};
+
+  for (const mode of modes) {
+    matrix[mode] = {
+      long: parseFloat(el(`price-${mode}-long`).value) || 0,
+      short: parseFloat(el(`price-${mode}-short`).value) || 0,
+      a4: parseFloat(el(`price-${mode}-a4`).value) || 0,
+    };
+  }
+
+  return matrix;
 }
 
 /**

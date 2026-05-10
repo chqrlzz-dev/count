@@ -284,7 +284,9 @@ function refreshItemRow(id) {
     <td>
       <select class="row-select" data-id="${id}" data-field="colorMode">
         <option value="bw"${item.colorMode === "bw" ? " selected" : ""}>B&amp;W</option>
-        <option value="color"${item.colorMode === "color" ? " selected" : ""}>Color</option>
+        <option value="color_small"${item.colorMode === "color_small" || item.colorMode === "color" ? " selected" : ""}>Small Color</option>
+        <option value="color_partial"${item.colorMode === "color_partial" ? " selected" : ""}>Partial Color</option>
+        <option value="color_full"${item.colorMode === "color_full" ? " selected" : ""}>Full Color</option>
       </select>
     </td>
     <td>

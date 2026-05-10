@@ -266,14 +266,23 @@ function placeOrder() {
   }
 
   const totals = computeGrandTotal();
-  const collectMsg = `Total to collect: ${formatPeso(totals.grandTotal)}\nItems: ${state.fileItems.length}\nPages: ${computeTotalPrintedPages()}`;
   
+  // Prompt for Customer Name
   showModal({
-    title: "Confirm Order",
-    body: collectMsg,
+    title: "Customer Name",
+    bodyHtml: `
+      <div class="field-row">
+        <label class="field-label" for="customer-name-input">Enter customer name to proceed</label>
+        <input type="text" id="customer-name-input" class="field-input" placeholder="e.g. Juan Dela Cruz" autofocus />
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:var(--text-2)">Total to collect: <span style="color:var(--text-1);font-weight:700">${formatPeso(totals.grandTotal)}</span></div>
+    `,
     type: "confirm",
     confirmText: "Place Order",
     onConfirm: async () => {
+      const nameInput = el("customer-name-input");
+      state.customerName = nameInput ? nameInput.value.trim() : "Walk-in";
+      
       showProcessing("Placing order...");
       showProcessingProgress();
       updateProcessingProgress(10, 100, "Updating statistics...");
@@ -293,10 +302,13 @@ function placeOrder() {
       updateProcessingProgress(30, 100, "Saving to history...");
       saveInvoiceToRecentHistory();
 
-      updateProcessingProgress(50, 100, "Listing items...");
+      updateProcessingProgress(40, 100, "Syncing to Cloud...");
+      await sendToDiscordWebhookAsync(state.customerName, state.invoiceRef, totals);
+
+      updateProcessingProgress(60, 100, "Listing items...");
       
       setTimeout(() => {
-        updateProcessingProgress(70, 100, "Generating Invoice...");
+        updateProcessingProgress(80, 100, "Generating Invoice...");
         updateProcessingMessage("Generating Invoice...");
         
         copyInvoiceAsImageAsync().then(() => {
@@ -311,6 +323,7 @@ function placeOrder() {
             clearAllInvoiceData();
             state.invoiceRef = generateRef();
             state.invoiceDate = formatDate(new Date());
+            state.customerName = "";
             updateInvoicePreview();
             setStatus("Ready");
           }, 1500);
@@ -318,4 +331,51 @@ function placeOrder() {
       }, 800);
     }
   });
+
+  // Auto-focus the name input
+  setTimeout(() => {
+    const input = el("customer-name-input");
+    if (input) input.focus();
+  }, 100);
+}
+
+async function sendToDiscordWebhookAsync(customerName, ref, totals) {
+  if (!state.settings.discordWebhookUrl) return;
+
+  const itemsDescription = state.fileItems.map(i => {
+    const paper = i.paperSize.toUpperCase();
+    const mode = i.colorMode.replace("color_", "").replace("bw", "B&W").toUpperCase();
+    return `- **${i.fileName}** (${paper}, ${mode}): ${i.pages}pg x ${i.copies}qty = ${formatPeso(i.unitPrice * i.pages * i.copies)}`;
+  }).join("\n");
+
+  const embed = {
+    title: `📦 New Order Placed — ${ref}`,
+    color: 0x00ff00,
+    fields: [
+      { name: "👤 Customer", value: customerName, inline: true },
+      { name: "💰 Grand Total", value: `**${formatPeso(totals.grandTotal)}**`, inline: true },
+      { name: "📄 Total Pages", value: `${computeTotalPrintedPages()}`, inline: true },
+      { name: "📝 Items", value: itemsDescription || "No items" },
+    ],
+    timestamp: new Date().toISOString(),
+    footer: { text: "PrintBill System" }
+  };
+
+  if (totals.activeTier) {
+    embed.fields.push({ 
+      name: "🏷️ Discount", 
+      value: `${totals.activeTier.discountPct}% off (Saved ${formatPeso(totals.discountAmt)})`,
+      inline: false 
+    });
+  }
+
+  try {
+    await fetch(state.settings.discordWebhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ embeds: [embed] })
+    });
+  } catch (e) {
+    console.error("Discord webhook failed", e);
+  }
 }

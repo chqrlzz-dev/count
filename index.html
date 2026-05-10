@@ -366,13 +366,34 @@
             <td><input type="number" class="matrix-input" id="price-bw-a4"    value="" min="0" step="0.50" data-mode="bw"    data-size="a4" /></td>
           </tr>
           <tr>
-            <th class="mode-label color-mode">Color</th>
-            <td><input type="number" class="matrix-input" id="price-color-long"  value="" min="0" step="0.50" data-mode="color" data-size="long" /></td>
-            <td><input type="number" class="matrix-input" id="price-color-short" value="" min="0" step="0.50" data-mode="color" data-size="short" /></td>
-            <td><input type="number" class="matrix-input" id="price-color-a4"    value="" min="0" step="0.50" data-mode="color" data-size="a4" /></td>
+            <th class="mode-label color-mode">Small Color</th>
+            <td><input type="number" class="matrix-input" id="price-color_small-long"  value="" min="0" step="0.50" data-mode="color_small" data-size="long" /></td>
+            <td><input type="number" class="matrix-input" id="price-color_small-short" value="" min="0" step="0.50" data-mode="color_small" data-size="short" /></td>
+            <td><input type="number" class="matrix-input" id="price-color_small-a4"    value="" min="0" step="0.50" data-mode="color_small" data-size="a4" /></td>
+          </tr>
+          <tr>
+            <th class="mode-label color-mode">Partial Color</th>
+            <td><input type="number" class="matrix-input" id="price-color_partial-long"  value="" min="0" step="0.50" data-mode="color_partial" data-size="long" /></td>
+            <td><input type="number" class="matrix-input" id="price-color_partial-short" value="" min="0" step="0.50" data-mode="color_partial" data-size="short" /></td>
+            <td><input type="number" class="matrix-input" id="price-color_partial-a4"    value="" min="0" step="0.50" data-mode="color_partial" data-size="a4" /></td>
+          </tr>
+          <tr>
+            <th class="mode-label color-mode">Full Color</th>
+            <td><input type="number" class="matrix-input" id="price-color_full-long"  value="" min="0" step="0.50" data-mode="color_full" data-size="long" /></td>
+            <td><input type="number" class="matrix-input" id="price-color_full-short" value="" min="0" step="0.50" data-mode="color_full" data-size="short" /></td>
+            <td><input type="number" class="matrix-input" id="price-color_full-a4"    value="" min="0" step="0.50" data-mode="color_full" data-size="a4" /></td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Integrations -->
+    <div>
+      <div class="drawer-section-title">Integrations</div>
+      <div class="field-row">
+        <label class="field-label" for="discord-webhook">Discord Webhook URL</label>
+        <input type="text" id="discord-webhook" class="field-input" placeholder="https://discord.com/api/webhooks/..." />
+      </div>
     </div>
 
     <!-- Tax & Rounding -->
@@ -435,15 +456,15 @@
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
         <div>
           <label class="field-label" style="font-size:10px" for="ream-price-long">Long</label>
-          <input type="number" id="ream-price-long" class="field-input" value="250" min="0" step="1" />
+          <input type="number" id="ream-price-long" class="field-input" value="197" min="0" step="1" />
         </div>
         <div>
           <label class="field-label" style="font-size:10px" for="ream-price-short">Short</label>
-          <input type="number" id="ream-price-short" class="field-input" value="200" min="0" step="1" />
+          <input type="number" id="ream-price-short" class="field-input" value="164" min="0" step="1" />
         </div>
         <div>
           <label class="field-label" style="font-size:10px" for="ream-price-a4">A4</label>
-          <input type="number" id="ream-price-a4" class="field-input" value="220" min="0" step="1" />
+          <input type="number" id="ream-price-a4" class="field-input" value="169" min="0" step="1" />
         </div>
       </div>
 
@@ -454,7 +475,7 @@
       
       <div class="field-row">
         <label class="field-label" for="ink-pages-yield">Est. Pages per Bottle</label>
-        <input type="number" id="ink-pages-yield" class="field-input" value="3000" min="1" step="100" />
+        <input type="number" id="ink-pages-yield" class="field-input" value="2500" min="1" step="100" />
       </div>
 
       <div class="field-row">
